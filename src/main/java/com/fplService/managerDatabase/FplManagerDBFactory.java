@@ -9,12 +9,10 @@ public class FplManagerDBFactory {
 
     Connection dbConnection;
     
-
     public void storeManager(FplManager manager) throws SQLException {
         
-        FplDatabaseConnector dbConnector =  new FplDatabaseConnector();
-        dbConnection = dbConnector.getFplDbConnection();
-
+        dbConnection = FplDatabaseConnector.getFplDbConnection();
+        
         String insertQuery = "INSERT INTO fpl_managers(manager_id, first_name, second_name, team_name) VALUES (?, ?, ?, ?)";
         
         Statement stmt = dbConnection.createStatement();
@@ -22,22 +20,28 @@ public class FplManagerDBFactory {
 
         buildInsertManagerStatement(manager, pStmt);
         executeStatement(stmt, pStmt);
-
-        dbConnector.closeDatabaseConnection(dbConnection);
         
     }
 
     public void deleteAllManagers() throws SQLException {
 
-        FplDatabaseConnector dbConnector =  new FplDatabaseConnector();
-        dbConnection = dbConnector.getFplDbConnection();
+        dbConnection = FplDatabaseConnector.getFplDbConnection();
 
         String deleteQuery = "DELETE FROM fpl_managers";
         Statement stmt = dbConnection.createStatement();
         PreparedStatement pStmt = dbConnection.prepareStatement(deleteQuery);
         executeStatement(stmt, pStmt);
+         
+    }
 
-        dbConnector.closeDatabaseConnection(dbConnection);
+    public void deleteAllGameweeks() throws SQLException {
+
+        dbConnection = FplDatabaseConnector.getFplDbConnection();
+
+        String deleteQuery = "DELETE FROM fpl_gameweeks";
+        Statement stmt = dbConnection.createStatement();
+        PreparedStatement pStmt = dbConnection.prepareStatement(deleteQuery);
+        executeStatement(stmt, pStmt);
          
     }
 
@@ -47,7 +51,6 @@ public class FplManagerDBFactory {
         pStmt.setString(2, manager.getManagerFirstName());
         pStmt.setString(3, manager.getManagerLastName());
         pStmt.setString(4, manager.getTeamName());
-
 
     }
 
