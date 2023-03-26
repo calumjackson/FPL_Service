@@ -11,7 +11,6 @@ public class ManagerDetailsResponseDecoder {
 
         ManagerDetails managerDetails = null;
         managerDetails = new Gson().fromJson((responseBody), ManagerDetails.class);
-         System.out.println(managerDetails.id);
         return new FplManager(managerDetails.getManagerId(), managerDetails.getPlayer_first_name(), managerDetails.getPlayer_last_name(), managerDetails.getName());
 
 
@@ -25,7 +24,6 @@ public class ManagerDetailsResponseDecoder {
         String name;
         
         public Integer getManagerId() {
-            System.out.println(id);
             return Integer.parseInt(id);
         }
 

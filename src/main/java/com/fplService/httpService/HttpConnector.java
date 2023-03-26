@@ -5,12 +5,10 @@ import com.fplService.league.FplLeague;
 import com.fplService.league.LeagueResponseDecoder;
 import com.fplService.manager.FplManager;
 import com.fplService.manager.ManagerDetailsResponseDecoder;
-import com.fplService.manager.ManagerResponseDecoder;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import okhttp3.ResponseBody;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -24,31 +22,6 @@ public class HttpConnector {
 
     OkHttpClient client = new OkHttpClient();
 
-    public void generateApiRequest(Integer userId) {
-
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Connection", "keep-alive");
-
-        String fplUrl = "https://fantasy.premierleague.com/api/entry/"+userId+"/history/";
-
-        
-        Request request = getRequest(fplUrl);
-
-        Response response = null;
-        try {
-            response = client.newCall(request).execute();
-
-            ResponseBody responseBody = response.body();
-            String managerJsonString = responseBody.string();
-            // System.out.println(managerJsonString);
-            new ManagerResponseDecoder().decodeResponse(managerJsonString);
-
-            System.out.println(response.isSuccessful());
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     public FplManager getManagerDetailsFromFPL(Integer userId) {
 
@@ -64,15 +37,8 @@ public class HttpConnector {
         try {
             response = client.newCall(request).execute();
 
-            ResponseBody responseBody = response.body();
-            String managerJsonString = responseBody.string();
-            // System.out.println(managerJsonString);
-            
-            FplManager fplManger = new ManagerDetailsResponseDecoder().decodeResponse(managerJsonString);
-
-            System.out.println(response.isSuccessful());
-
-            return fplManger;
+            String managerJsonString = response.body().string();
+            return new ManagerDetailsResponseDecoder().decodeResponse(managerJsonString);
 
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -91,18 +57,8 @@ public class HttpConnector {
         Response response = null;
         try {
             response = client.newCall(request).execute();
-
-            ResponseBody responseBody = response.body();
-            String managerJsonString = responseBody.string();
-            // System.out.println(managerJsonString);
-            
-            
-            FplLeague fplLeague = new FplLeague(leagueId, new LeagueResponseDecoder().decodeResponse(managerJsonString));
-
-
-            System.out.println(response.isSuccessful());
-
-            return fplLeague;
+            String managerJsonString = response.body().string();
+            return new FplLeague(leagueId, new LeagueResponseDecoder().decodeResponse(managerJsonString));
 
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -123,9 +79,7 @@ public class HttpConnector {
         try {
             response = client.newCall(request).execute();
 
-            ResponseBody responseBody = response.body();
-            String managerJsonString = responseBody.string();
-            // System.out.println(managerJsonString);
+            String managerJsonString = response.body().string();
             
             List<FplGameweek> gameweeks = new FplGameweekResponseDecoder().decodeResponse(managerJsonString);
             for (FplGameweek gameweek : gameweeks) {
@@ -135,7 +89,6 @@ public class HttpConnector {
             }
 
             return gameweeks;
-
 
         } catch (IOException e) {
             throw new RuntimeException(e);

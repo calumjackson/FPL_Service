@@ -10,8 +10,7 @@ public class FplGameweekDbConnector {
 
     public void storeGameweek(FplGameweek gameweek) throws SQLException {
         
-        FplDatabaseConnector dbConnector =  new FplDatabaseConnector();
-        dbConnection = dbConnector.getFplDbConnection();
+        dbConnection = FplDatabaseConnector.getFplDbConnection();
 
         String insertQuery = "INSERT INTO fpl_gameweeks(manager_id, gameweek_id, season_id, week_points, bench_points, transfer_point_deductions) VALUES (?, ?, ?, ?, ?, ?)";
         
@@ -20,8 +19,6 @@ public class FplGameweekDbConnector {
 
         buildInsertGameweekStatement(gameweek, pStmt);
         executeStatement(stmt, pStmt);
-
-        dbConnector.closeDatabaseConnection(dbConnection);
         
     }
 

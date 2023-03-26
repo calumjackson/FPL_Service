@@ -7,24 +7,21 @@ import java.sql.SQLException;
 
 public class FplDatabaseConnector {
 
-    Connection connection;
+    private static Connection connection;
 
-    public FplDatabaseConnector(Connection connection) {
-        this.connection = connection;
+    private FplDatabaseConnector() throws SQLException {
+        
+        FplDatabaseConnector.connection = connectToPostgresDatabase();
     }
 
-    public FplDatabaseConnector() throws SQLException {
-        this.connection = connectToPostgresDatabase();
-    }
-
-    public Connection connectToPostgresDatabase() throws SQLException {
+    private static Connection connectToPostgresDatabase() throws SQLException {
 
         try {
             connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/fplService", "calumjackson", "");
             // System.out.println("Connected to Database");
 
         } catch (SQLException e) {
-            System.out.println("Not connected to Database");
+            System.out.println("Error: Not connected to Database");
             throw e;
         }
 
@@ -32,11 +29,16 @@ public class FplDatabaseConnector {
 
     }
 
-    public void closeDatabaseConnection(Connection connection) throws SQLException {
+    public static void closeDatabaseConnection() throws SQLException {
         connection.close();
     }
 
-    public Connection getFplDbConnection() {
+    public static Connection getFplDbConnection() throws SQLException {
+        if (connection == null) {
+            connection = connectToPostgresDatabase();
+        } else if (connection.isClosed()) {
+            connection = connectToPostgresDatabase();
+        }
         return connection;
     }
 

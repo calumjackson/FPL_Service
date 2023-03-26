@@ -7,15 +7,7 @@ public class FplLeagueFactory {
 
     
     public FplLeague createFplLeage(Integer leagueId) {
-        
-        FplLeague fplLeague = requestFplLeagueDetails(leagueId);
-
-        System.out.println(fplLeague.getLeagueName());
-        for (Integer managerId : fplLeague.getManagerIds()) {
-            System.out.println(managerId);
-        }
-
-        return fplLeague;
+        return requestFplLeagueDetails(leagueId);
     }
 
     private FplLeague requestFplLeagueDetails(Integer leagueId) {
