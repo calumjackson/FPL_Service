@@ -38,9 +38,6 @@ public class TestHttpConnector {
                 response.append(inputLine);
             }
             in.close();
-
-            // print result
-            System.out.println(response.toString());
         } else {
             System.out.println("GET request not worked");
         }

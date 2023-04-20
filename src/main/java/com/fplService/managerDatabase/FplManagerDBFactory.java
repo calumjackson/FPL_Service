@@ -40,15 +40,23 @@ public class FplManagerDBFactory {
 
     public void deleteAllManagers() throws SQLException {
 
-        FplDatabaseConnector dbConnector =  new FplDatabaseConnector();
-        dbConnection = dbConnector.getFplDbConnection();
+        dbConnection = FplDatabaseConnector.getFplDbConnection();
 
         String deleteQuery = "DELETE FROM fpl_managers";
         Statement stmt = dbConnection.createStatement();
         PreparedStatement pStmt = dbConnection.prepareStatement(deleteQuery);
         executeStatement(stmt, pStmt);
+         
+    }
 
-        dbConnector.closeDatabaseConnection(dbConnection);
+    public void deleteAllGameweeks() throws SQLException {
+
+        dbConnection = FplDatabaseConnector.getFplDbConnection();
+
+        String deleteQuery = "DELETE FROM fpl_gameweeks";
+        Statement stmt = dbConnection.createStatement();
+        PreparedStatement pStmt = dbConnection.prepareStatement(deleteQuery);
+        executeStatement(stmt, pStmt);
          
     }
 
@@ -58,7 +66,6 @@ public class FplManagerDBFactory {
         pStmt.setString(2, manager.getManagerFirstName());
         pStmt.setString(3, manager.getManagerLastName());
         pStmt.setString(4, manager.getTeamName());
-
 
     }
 

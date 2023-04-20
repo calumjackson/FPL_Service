@@ -11,7 +11,7 @@ public class FplGameweekDbConnector {
     public void storeGameweek(FplGameweek gameweek)  {
         
         FplDatabaseConnector dbConnector = null;
-        
+        dbConnector = null;
         
         try {
             
@@ -52,9 +52,6 @@ public class FplGameweekDbConnector {
         pStmt.setInt(4, gameweek.getGameweekPoints());
         pStmt.setInt(5, gameweek.getGameweekBenchPoints());
         pStmt.setInt(6, gameweek.getTransferPointCosts());
-
-
-
 
     }
 

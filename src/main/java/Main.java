@@ -1,9 +1,9 @@
+import com.fplService.databaseConnection.FplDatabaseConnector;
 import com.fplService.gameweek.FplGameweekFactory;
 import com.fplService.league.FplLeague;
 import com.fplService.league.FplLeagueFactory;
 import com.fplService.manager.FplManagerFactory;
 import com.fplService.managerDatabase.FplManagerDBFactory;
-import com.fplService.team_producer.team_producer;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -13,10 +13,10 @@ public class Main {
     public static void main(String[] args) {
 
         try {
-
-            clearDownManagers();
+            
+            clearDownData();
             Integer leagueId = 57365;
-
+            
             // Get the league details
             FplLeague fplLeague = new FplLeagueFactory().createFplLeage(leagueId);
             List<Integer> managerIds = fplLeague.getManagerIds();
@@ -34,7 +34,15 @@ public class Main {
         } catch (Exception e){
             e.printStackTrace();
         } finally {
-            
+            closeDatabase();
+        }
+    }
+
+    private static void closeDatabase() {
+        try {
+            FplDatabaseConnector.closeDatabaseConnection();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
@@ -42,8 +50,10 @@ public class Main {
         new FplGameweekFactory().createManagerGameweek(managerId);
     }
 
-    private static void clearDownManagers() throws SQLException {
+    private static void clearDownData() throws SQLException {
         new FplManagerDBFactory().deleteAllManagers();
+        new FplManagerDBFactory().deleteAllGameweeks();
+        
     }
 
 }

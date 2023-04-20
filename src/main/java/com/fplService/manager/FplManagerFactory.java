@@ -13,7 +13,6 @@ public class FplManagerFactory {
         FplManager fplManager = requestFplManagerDetails(managerId);
 
         try {
-            
             // Store in the database.
             new FplManagerDBFactory().storeManager(fplManager);
             
