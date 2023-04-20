@@ -8,22 +8,41 @@ public class FplGameweekDbConnector {
     
     Connection dbConnection;
 
-    public void storeGameweek(FplGameweek gameweek) throws SQLException {
+    public void storeGameweek(FplGameweek gameweek)  {
         
-        FplDatabaseConnector dbConnector =  new FplDatabaseConnector();
-        dbConnection = dbConnector.getFplDbConnection();
-
-        String insertQuery = "INSERT INTO fpl_gameweeks(manager_id, gameweek_id, season_id, week_points, bench_points, transfer_point_deductions) VALUES (?, ?, ?, ?, ?, ?)";
+        FplDatabaseConnector dbConnector = null;
         
-        Statement stmt = dbConnection.createStatement();
-        PreparedStatement pStmt = dbConnection.prepareStatement(insertQuery);
-
-        buildInsertGameweekStatement(gameweek, pStmt);
-        executeStatement(stmt, pStmt);
-
-        dbConnector.closeDatabaseConnection(dbConnection);
         
+        try {
+            
+            dbConnector = new FplDatabaseConnector();
+            dbConnection = dbConnector.getFplDbConnection();
+
+            String insertQuery = "INSERT INTO fpl_gameweeks(manager_id, gameweek_id, season_id, week_points, bench_points, transfer_point_deductions) VALUES (?, ?, ?, ?, ?, ?)";
+            
+            Statement stmt = dbConnection.createStatement();
+            PreparedStatement pStmt = dbConnection.prepareStatement(insertQuery);
+
+            buildInsertGameweekStatement(gameweek, pStmt);
+            executeStatement(stmt, pStmt);
+
+        } catch (SQLException e) {
+            if (e.getErrorCode()== 0) {
+                // e.printStackTrace();
+            } else { 
+                e.printStackTrace();
+            } 
+        } finally {
+                
+            try {
+                dbConnector.closeDatabaseConnection(dbConnection);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }        }
+
     }
+        
+    
 
     private void buildInsertGameweekStatement(FplGameweek gameweek, PreparedStatement pStmt) throws SQLException {
         

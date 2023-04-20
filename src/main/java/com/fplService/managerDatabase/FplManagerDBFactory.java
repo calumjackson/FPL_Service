@@ -10,20 +10,31 @@ public class FplManagerDBFactory {
     Connection dbConnection;
     
 
-    public void storeManager(FplManager manager) throws SQLException {
-        
-        FplDatabaseConnector dbConnector =  new FplDatabaseConnector();
-        dbConnection = dbConnector.getFplDbConnection();
+    public void storeManager(FplManager manager) {
+        try {
 
-        String insertQuery = "INSERT INTO fpl_managers(manager_id, first_name, second_name, team_name) VALUES (?, ?, ?, ?)";
-        
-        Statement stmt = dbConnection.createStatement();
-        PreparedStatement pStmt = dbConnection.prepareStatement(insertQuery);
+            FplDatabaseConnector dbConnector =  new FplDatabaseConnector();
+            dbConnection = dbConnector.getFplDbConnection();
+            
+            String insertQuery = "INSERT INTO fpl_managers(manager_id, first_name, second_name, team_name) VALUES (?, ?, ?, ?)";
+            
+            Statement stmt = dbConnection.createStatement();
+            PreparedStatement pStmt = dbConnection.prepareStatement(insertQuery);
+            
+            buildInsertManagerStatement(manager, pStmt);
+            executeStatement(stmt, pStmt);
+            
+            dbConnector.closeDatabaseConnection(dbConnection);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally { 
+            try {
+                dbConnection.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
-        buildInsertManagerStatement(manager, pStmt);
-        executeStatement(stmt, pStmt);
-
-        dbConnector.closeDatabaseConnection(dbConnection);
+        }
         
     }
 

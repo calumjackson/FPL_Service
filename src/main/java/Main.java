@@ -1,7 +1,9 @@
 import com.fplService.gameweek.FplGameweekFactory;
 import com.fplService.league.FplLeague;
 import com.fplService.league.FplLeagueFactory;
+import com.fplService.manager.FplManagerFactory;
 import com.fplService.managerDatabase.FplManagerDBFactory;
+import com.fplService.team_producer.team_producer;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -20,9 +22,9 @@ public class Main {
             List<Integer> managerIds = fplLeague.getManagerIds();
 
             // Create all the managers in the league
-            // for (Integer managerId : managerIds) {
-            //     new FplManagerFactory().createFplManager(managerId);
-            // }
+             for (Integer managerId : managerIds) {
+                new FplManagerFactory().createFplManager(managerId);
+             }
 
             // Get the gameweek totals for each manager.
             for (Integer managerId : managerIds) {
@@ -31,6 +33,8 @@ public class Main {
 
         } catch (Exception e){
             e.printStackTrace();
+        } finally {
+            
         }
     }
 

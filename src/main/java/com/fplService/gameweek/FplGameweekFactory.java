@@ -1,6 +1,5 @@
 package com.fplService.gameweek;
 
-import java.sql.SQLException;
 import java.util.List;
 
 import com.fplService.httpService.HttpConnector;
@@ -12,15 +11,8 @@ public class FplGameweekFactory {
         List<FplGameweek> fplGameweeks = requestGameweekDetails(managerId);
         for (FplGameweek gameweek : fplGameweeks) {
 
-            try {
-                // Store in the database.
-                new FplGameweekDbConnector().storeGameweek(gameweek);
-            } catch (SQLException e) {
-                if (e.getErrorCode()== 0) {
-                    // e.printStackTrace();
-                } else { e.printStackTrace();} 
-                 ;
-            }
+            new FplGameweekDbConnector().storeGameweek(gameweek);
+
         }
             
     }

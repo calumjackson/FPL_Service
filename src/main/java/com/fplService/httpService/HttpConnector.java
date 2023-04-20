@@ -5,7 +5,6 @@ import com.fplService.league.FplLeague;
 import com.fplService.league.LeagueResponseDecoder;
 import com.fplService.manager.FplManager;
 import com.fplService.manager.ManagerDetailsResponseDecoder;
-import com.fplService.manager.ManagerResponseDecoder;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -41,7 +40,7 @@ public class HttpConnector {
             ResponseBody responseBody = response.body();
             String managerJsonString = responseBody.string();
             // System.out.println(managerJsonString);
-            new ManagerResponseDecoder().decodeResponse(managerJsonString);
+            new ManagerDetailsResponseDecoder().decodeResponse(managerJsonString);
 
             System.out.println(response.isSuccessful());
 
