@@ -17,11 +17,8 @@ public class FplManagerFactory {
             new FplManagerDBFactory().storeManager(fplManager);
             
             ManagerProducer managerProducer = new ManagerProducer();
-            managerProducer.createTeamProducer();
 
-            String managerMessage = fplManager.getManagerId().toString() + ": " + fplManager.getManagerFirstName() + " " + fplManager.getManagerLastName();
-
-            ProducerRecord<String, String> managerRecord = new ProducerRecord<String, String>("test", managerMessage);
+            ProducerRecord<String, String> managerRecord = new ProducerRecord<String, String>(ManagerProducer.MANAGER_TOPIC, fplManager.toString());
             managerProducer.sendMessage(managerRecord);
 
         } catch (Exception e) {

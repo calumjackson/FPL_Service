@@ -1,5 +1,7 @@
 package com.fplService.gameweek;
 
+import com.google.gson.Gson;
+
 public class FplGameweek {
     
     Integer managerId;
@@ -56,5 +58,29 @@ public class FplGameweek {
         this.transferPointCosts = transferPointCosts;
     }
 
+
+    public String toString() {
+
+
+        String formatString = "{ \"managerId\": \"%s\", "
+                + "\"gameweekId\": \"%s\", "
+                + "\"seasonId\": \"%s\", "
+                + "\"gameweekPoints\": \"%s\", "
+                + "\"gameweekBenchPoints\": \"%s\", "
+                + "\"transferPointCosts\": \"%s\" }";
+
+
+        return String.format(formatString, getManagerId().toString(), getGameweekId().toString()
+                        , getSeasonId()
+                        , getGameweekPoints().toString(), getGameweekBenchPoints().toString()
+                        , getTransferPointCosts().toString());
+    }  
+
+    public FplGameweek decodeGameweekJson(String gameweekJSON) {
+
+        FplGameweek gameweek = new Gson().fromJson((gameweekJSON), FplGameweek.class);        
+        return gameweek;
+        
+    }
 
 }

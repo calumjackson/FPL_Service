@@ -9,7 +9,12 @@ import org.apache.kafka.common.serialization.StringSerializer;
 
 public class ManagerProducer {
 
+    public static final String MANAGER_TOPIC = "test";
     private KafkaProducer<String, String> managerProducer;
+
+    public ManagerProducer() {
+        createTeamProducer();
+    }
 
     public void createTeamProducer() {
 

@@ -15,10 +15,11 @@ public class FplGameweekFactory {
         List<FplGameweek> fplGameweeks = requestGameweekDetails(managerId);
             for (FplGameweek gameweek : fplGameweeks) {
                 
-                String topic = "test";
-                String gameweekDetails = gameweek.gameweekId.toString() + ": " + gameweek.gameweekPoints;
-                ProducerRecord<String, String> gameweekRecord = new ProducerRecord<String,String>(topic, gameweekDetails);
+                ProducerRecord<String, String> gameweekRecord 
+                    = new ProducerRecord<String,String>(GameweekProducer.GAMEWEEK_TOPIC, gameweek.toString());
+
                 gameweekProducer.sendMessage(gameweekRecord);
+                
                 new FplGameweekDbConnector().storeGameweek(gameweek);
 
         }
