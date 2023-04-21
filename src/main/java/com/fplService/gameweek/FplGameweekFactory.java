@@ -9,7 +9,7 @@ public class FplGameweekFactory {
     public void createManagerGameweek(Integer managerId) {
         
         List<FplGameweek> fplGameweeks = requestGameweekDetails(managerId);
-        for (FplGameweek gameweek : fplGameweeks) {
+            for (FplGameweek gameweek : fplGameweeks) {
 
             new FplGameweekDbConnector().storeGameweek(gameweek);
 
