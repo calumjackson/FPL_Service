@@ -42,29 +42,57 @@ public class FplManagerDBFactory {
         Integer managerCount = -1;
         Statement stmt = null;
         PreparedStatement pStmt = null;
+        ResultSet managerCountQuery = null;
+
         try {
-            dbConnection = FplDatabaseConnector.getFplDbConnection();
-            
+            dbConnection = FplDatabaseConnector.getFplDbConnection();    
             
             String selectQuery = "Select count(*) managerCount FROM fpl_managers";
             stmt = dbConnection.createStatement();
             pStmt = dbConnection.prepareStatement(selectQuery);
 
-            ResultSet managerCountQuery = executeQueryStatement(stmt, pStmt);
+            managerCountQuery = executeQueryStatement(stmt, pStmt);
             managerCountQuery.next();
             managerCount =  managerCountQuery.getInt("managerCount");
-
-
-            managerCountQuery.close();
-
+                        
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
+            managerCountQuery.close();
             dbConnection.close();
             closeStatements(stmt, pStmt);
         }
 
         return managerCount;
+    }
+
+    public Integer getGameweekCount() throws SQLException {
+
+        Integer gameweekCount = -1;
+        Statement stmt = null;
+        PreparedStatement pStmt = null;
+        ResultSet gameweekResultSet = null;
+
+        try {
+            dbConnection = FplDatabaseConnector.getFplDbConnection();    
+            
+            String selectQuery = "Select count(*) gameweekCount FROM fpl_gameweeks";
+            stmt = dbConnection.createStatement();
+            pStmt = dbConnection.prepareStatement(selectQuery);
+
+            gameweekResultSet = executeQueryStatement(stmt, pStmt);
+            gameweekResultSet.next();
+            gameweekCount =  gameweekResultSet.getInt("gameweekCount");
+                        
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            gameweekResultSet.close();
+            dbConnection.close();
+            closeStatements(stmt, pStmt);
+        }
+
+        return gameweekCount;
     }
 
     public void deleteAllManagers() throws SQLException {

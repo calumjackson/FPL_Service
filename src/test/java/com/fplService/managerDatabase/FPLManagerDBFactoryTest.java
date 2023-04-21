@@ -29,4 +29,28 @@ public class FPLManagerDBFactoryTest {
 
     } 
 
+    @Test
+    public void testDeleteAllGameweeks() {
+
+        Integer gameweekCountValue = -1;
+        FplManagerDBFactory managerFactory = new FplManagerDBFactory();
+        try {
+            managerFactory.deleteAllGameweeks();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        try {
+            gameweekCountValue = managerFactory.getGameweekCount();
+            System.out.println();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        Integer expected = 0;
+        assertEquals(expected, gameweekCountValue);
+
+    } 
+
+
+
 }
