@@ -37,6 +37,36 @@ public class FplManagerDBFactory {
         
     }
 
+    public Integer getManagerCount() throws SQLException {
+
+        Integer managerCount = -1;
+        Statement stmt = null;
+        PreparedStatement pStmt = null;
+        try {
+            dbConnection = FplDatabaseConnector.getFplDbConnection();
+            
+            
+            String selectQuery = "Select count(*) managerCount FROM fpl_managers";
+            stmt = dbConnection.createStatement();
+            pStmt = dbConnection.prepareStatement(selectQuery);
+
+            ResultSet managerCountQuery = executeQueryStatement(stmt, pStmt);
+            managerCountQuery.next();
+            managerCount =  managerCountQuery.getInt("managerCount");
+
+
+            managerCountQuery.close();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            dbConnection.close();
+            closeStatements(stmt, pStmt);
+        }
+
+        return managerCount;
+    }
+
     public void deleteAllManagers() throws SQLException {
 
         dbConnection = FplDatabaseConnector.getFplDbConnection();
@@ -79,6 +109,37 @@ public class FplManagerDBFactory {
         } finally {
             stmt.close();
             pStmt.close();
+        }
+    }
+
+    private ResultSet executeQueryStatement(Statement stmt, PreparedStatement pStmt) throws SQLException {
+        ResultSet results = null;
+        try {
+            results = pStmt.executeQuery();
+            System.out.println(results.isClosed());
+
+            
+        } catch (Exception e) {
+            stmt.close();
+            pStmt.close();
+            e.printStackTrace();
+        } finally {
+            // stmt.close();
+            // pStmt.close();
+        }
+        
+        System.out.println(results.isClosed());
+        return results;
+
+    }
+
+    private void closeStatements(Statement stmt, PreparedStatement pStmt) {
+        try {
+
+            stmt.close();
+            pStmt.close();
+        } catch (SQLException e) { 
+            e.printStackTrace();
         }
     }
 

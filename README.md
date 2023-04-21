@@ -7,4 +7,5 @@ Start kafka with
 
 Start database with:
 > sudo chmod -R 700 FplData
+>
 > pg_ctl -D FplData -l logfile start
