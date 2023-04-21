@@ -24,8 +24,6 @@ public class FplManagerFactory {
             ProducerRecord<String, String> managerRecord = new ProducerRecord<String, String>("test", managerMessage);
             managerProducer.sendMessage(managerRecord);
 
-            
-
         } catch (Exception e) {
             
             e.printStackTrace();
