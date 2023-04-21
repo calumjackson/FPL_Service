@@ -1,4 +1,4 @@
-package com.fplService.manager;
+package com.fplService.gameweek;
 
 import java.util.Properties;
 
@@ -7,16 +7,17 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
 
-public class ManagerProducer {
+public class GameweekProducer {
+    
+    private KafkaProducer<String, String> gameweekProducer;
+    static String GAMEWEEK_TOPIC = "test"; 
 
-    public static final String MANAGER_TOPIC = "test";
-    private KafkaProducer<String, String> managerProducer;
 
-    public ManagerProducer() {
-        createTeamProducer();
+    public GameweekProducer() {
+        createGameweekProducer();
     }
 
-    public void createTeamProducer() {
+    public void createGameweekProducer() {
 
         String boostrapServers = "localhost:9092"; 
     
@@ -27,16 +28,17 @@ public class ManagerProducer {
     
             KafkaProducer<String, String> producer = new KafkaProducer<>(producerProps);
     
-            this.managerProducer = producer;
+            this.gameweekProducer = producer;
     }
 
     public void sendMessage(ProducerRecord<String, String> producerRecord) {
 
-        managerProducer.send(producerRecord);
+        gameweekProducer.send(producerRecord);
 
     }  
 
     public void closeProducer() {
-        managerProducer.close();
+        gameweekProducer.close();
     }
+
 }

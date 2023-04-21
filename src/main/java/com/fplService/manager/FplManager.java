@@ -1,5 +1,7 @@
 package com.fplService.manager;
 
+import com.google.gson.Gson;
+
 public class FplManager {
 
     private String managerFirstName;
@@ -48,5 +50,24 @@ public class FplManager {
 
     public void setTeamName(String teamName) {
         this.teamName = teamName;
+    }
+
+    public String toString() {
+
+        String formatString = "{ \"managerFirstName\": \"%s\", "
+                + "\"managerLastName\": \"%s\", "
+                + "\"managerId\": \"%d\", "
+                + "\"teamName\": \"%s\" }";
+
+
+        return String.format(formatString, getManagerFirstName(), getManagerLastName(),
+                        getManagerId(), getTeamName());
+    }  
+
+    public FplManager decodeManagerJson(String managerJson) {
+
+        FplManager manager = new Gson().fromJson((managerJson), FplManager.class);        
+        return manager;
+        
     }
 }
