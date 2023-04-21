@@ -61,7 +61,6 @@ public class FplGameweek {
 
     public String toString() {
 
-
         String formatString = "{ \"managerId\": \"%s\", "
                 + "\"gameweekId\": \"%s\", "
                 + "\"seasonId\": \"%s\", "

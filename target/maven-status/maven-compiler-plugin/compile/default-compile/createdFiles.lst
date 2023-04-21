@@ -1,0 +1,13 @@
+com/fplService/manager/ManagerDetailsResponseDecoder$ManagerDetails.class
+com/fplService/league/LeagueResponseDecoder$LeagueDataShell.class
+com/fplService/gameweek/GameweekProducer.class
+com/fplService/managerDatabase/FplManagerDBFactory.class
+com/fplService/league/LeagueResponseDecoder.class
+com/fplService/httpService/TestHttpConnector.class
+com/fplService/databaseConnection/FplDatabaseConnector.class
+com/fplService/manager/FplManager.class
+com/fplService/league/LeagueResponseDecoder$ResultsDataShell.class
+com/fplService/manager/ManagerProducer.class
+com/fplService/league/LeagueResponseDecoder$TeamList.class
+com/fplService/league/FplLeague.class
+com/fplService/manager/ManagerDetailsResponseDecoder.class
