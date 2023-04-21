@@ -9,7 +9,7 @@ public class FplDatabaseConnector {
 
     private static Connection connection;
 
-    private FplDatabaseConnector() throws SQLException {
+    public FplDatabaseConnector() throws SQLException {
         
         FplDatabaseConnector.connection = connectToPostgresDatabase();
     }

@@ -13,8 +13,7 @@ public class FplManagerDBFactory {
     public void storeManager(FplManager manager) {
         try {
 
-            FplDatabaseConnector dbConnector =  new FplDatabaseConnector();
-            dbConnection = dbConnector.getFplDbConnection();
+            dbConnection = FplDatabaseConnector.getFplDbConnection();
             
             String insertQuery = "INSERT INTO fpl_managers(manager_id, first_name, second_name, team_name) VALUES (?, ?, ?, ?)";
             
@@ -24,7 +23,7 @@ public class FplManagerDBFactory {
             buildInsertManagerStatement(manager, pStmt);
             executeStatement(stmt, pStmt);
             
-            dbConnector.closeDatabaseConnection(dbConnection);
+            FplDatabaseConnector.closeDatabaseConnection();
         } catch (SQLException e) {
             e.printStackTrace();
         } finally { 
