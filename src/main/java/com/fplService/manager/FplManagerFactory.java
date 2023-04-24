@@ -20,11 +20,9 @@ public class FplManagerFactory {
 
             ProducerRecord<String, String> managerRecord = new ProducerRecord<String, String>(ManagerProducer.MANAGER_TOPIC, fplManager.toString());
             managerProducer.sendMessage(managerRecord);
-
-        } catch (Exception e) {
             
+        } catch (Exception e) {
             e.printStackTrace();
-
         }
 
     }

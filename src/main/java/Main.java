@@ -3,14 +3,19 @@ import com.fplService.gameweek.FplGameweekFactory;
 import com.fplService.league.FplLeague;
 import com.fplService.league.FplLeagueFactory;
 import com.fplService.manager.FplManagerFactory;
+import com.fplService.manager.ManagerConsumer;
+import com.fplService.manager.ManagerConsumerCloser;
 import com.fplService.managerDatabase.FplManagerDBFactory;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 public class Main {
 
     public static void main(String[] args) {
+
+        ManagerConsumer consumer = null;
 
         try {
             
@@ -21,6 +26,11 @@ public class Main {
             FplLeague fplLeague = new FplLeagueFactory().createFplLeage(leagueId);
             List<Integer> managerIds = fplLeague.getManagerIds();
 
+            CountDownLatch latch = new CountDownLatch(1); 
+            consumer = new ManagerConsumer(latch);
+            new Thread(consumer).start();
+
+
             // Create all the managers in the league
              for (Integer managerId : managerIds) {
                 new FplManagerFactory().createFplManager(managerId);
@@ -28,14 +38,19 @@ public class Main {
 
             // Get the gameweek totals for each manager.
             for (Integer managerId : managerIds) {
-                populateGameweekTotals(managerId);
+                // populateGameweekTotals(managerId);
             }
+
+            System.out.println("test");
 
         } catch (Exception e){
             e.printStackTrace();
         } finally {
             closeDatabase();
+            Runtime.getRuntime().addShutdownHook(new Thread(new ManagerConsumerCloser(consumer)));
         }
+
+        System.out.println("Main.main()");
     }
 
     private static void closeDatabase() {
@@ -55,5 +70,6 @@ public class Main {
         new FplManagerDBFactory().deleteAllGameweeks();
         
     }
+
 
 }
