@@ -37,12 +37,12 @@ public final class ManagerConsumer implements Runnable {
         KafkaConsumer<String, String> consumer = new KafkaConsumer<String, String>(consumerProps);
 
         this.managerConsumer = consumer;
-
+        
+        managerConsumer.subscribe(Collections.singletonList(MANAGER_TOPIC));
     }
 
     public void receiveMessage() {
 
-        managerConsumer.subscribe(Collections.singletonList(MANAGER_TOPIC));
         ;
 
         Duration timeout = Duration.ofMillis(100);
@@ -50,15 +50,7 @@ public final class ManagerConsumer implements Runnable {
 
             while (true) {
 
-                ConsumerRecords<String, String> records = managerConsumer.poll(timeout);
-
-                for (ConsumerRecord<String, String> record : records) {
-                    System.out.printf("topic = %s, partition = %d, offset = %d, " +
-                            "customer = %s, country = %s\n",
-                            record.topic(), record.partition(), record.offset(),
-                            record.key(), record.value());
-
-                }
+                pollManagerConsumer(timeout);
             }
         } catch (WakeupException e) {
             System.out.println("Woken up");
@@ -67,6 +59,18 @@ public final class ManagerConsumer implements Runnable {
             latch.countDown();
         }
 
+    }
+
+    void pollManagerConsumer(Duration timeout) {
+        ConsumerRecords<String, String> records = managerConsumer.poll(timeout);
+
+        for (ConsumerRecord<String, String> record : records) {
+            System.out.printf("topic = %s, partition = %d, offset = %d, " +
+                    "customer = %s, country = %s\n",
+                    record.topic(), record.partition(), record.offset(),
+                    record.key(), record.value());
+
+        }
     }
 
     public void closeProducer() {
@@ -80,7 +84,6 @@ public final class ManagerConsumer implements Runnable {
 
     public void shutdown() throws InterruptedException {
         managerConsumer.wakeup();
-        System.out.println("gets here");
         latch.await();
     }
 

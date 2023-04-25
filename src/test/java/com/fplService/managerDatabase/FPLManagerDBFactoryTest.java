@@ -19,7 +19,6 @@ public class FPLManagerDBFactoryTest {
         }
         try {
             managerCountValue = managerFactory.getManagerCount();
-            System.out.println();
         } catch (SQLException e) {
             e.printStackTrace();
         }

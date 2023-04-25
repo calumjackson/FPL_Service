@@ -38,10 +38,8 @@ public class Main {
 
             // Get the gameweek totals for each manager.
             for (Integer managerId : managerIds) {
-                // populateGameweekTotals(managerId);
+                populateGameweekTotals(managerId);
             }
-
-            System.out.println("test");
 
         } catch (Exception e){
             e.printStackTrace();
@@ -50,7 +48,7 @@ public class Main {
             Runtime.getRuntime().addShutdownHook(new Thread(new ManagerConsumerCloser(consumer)));
         }
 
-        System.out.println("Main.main()");
+        System.exit(0);
     }
 
     private static void closeDatabase() {
