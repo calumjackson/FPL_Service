@@ -10,7 +10,7 @@ public class FplManager {
     private String teamName;
 
  
-
+    
 
     public FplManager(Integer managerId, String managerFirstName, String managerLastName, String teamName) {
         this.managerId = managerId;
@@ -19,7 +19,7 @@ public class FplManager {
         this.teamName = teamName;
 
     }
-    
+
     public String getManagerFirstName() {
         return managerFirstName;
     }

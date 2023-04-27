@@ -1,4 +1,4 @@
-package com.fplService.manager;
+package com.fplService.gameweek;
 
 import java.time.Duration;
 import java.util.Collections;
@@ -9,18 +9,17 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.errors.WakeupException;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
-import com.fplService.managerDatabase.FplManagerDBFactory;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 
-public final class ManagerConsumer implements Runnable {
+public final class GameweekConsumer implements Runnable {
 
-    public static final String MANAGER_TOPIC = "fpl_managers";
-    private KafkaConsumer<String, String> managerConsumer;
+    public static final String GAMEWEEK_TOPIC = "fpl_gameweeks";
+    private KafkaConsumer<String, String> gamweekConsumer;
     private CountDownLatch latch;
 
-    public ManagerConsumer(CountDownLatch latch) {
+    public GameweekConsumer(CountDownLatch latch) {
         createTeamConsumer();
         this.latch = latch;
     }
@@ -31,16 +30,16 @@ public final class ManagerConsumer implements Runnable {
 
         Properties consumerProps = new Properties();
         consumerProps.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, boostrapServers);
-        consumerProps.setProperty(ConsumerConfig.GROUP_ID_CONFIG, MANAGER_TOPIC);
+        consumerProps.setProperty(ConsumerConfig.GROUP_ID_CONFIG, GAMEWEEK_TOPIC);
         consumerProps.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         consumerProps.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         consumerProps.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
 
         KafkaConsumer<String, String> consumer = new KafkaConsumer<String, String>(consumerProps);
 
-        this.managerConsumer = consumer;
+        this.gamweekConsumer = consumer;
         
-        managerConsumer.subscribe(Collections.singletonList(MANAGER_TOPIC));
+        gamweekConsumer.subscribe(Collections.singletonList(GAMEWEEK_TOPIC));
     }
 
     public void receiveMessage() {
@@ -57,14 +56,14 @@ public final class ManagerConsumer implements Runnable {
         } catch (WakeupException e) {
             System.out.println("Woken up");
         } finally {
-            managerConsumer.close();
+            gamweekConsumer.close();
             latch.countDown();
         }
 
     }
 
     void pollManagerConsumer(Duration timeout) {
-        ConsumerRecords<String, String> records = managerConsumer.poll(timeout);
+        ConsumerRecords<String, String> records = gamweekConsumer.poll(timeout);
 
         for (ConsumerRecord<String, String> record : records) {
             System.out.printf("topic = %s, partition = %d, offset = %d, " +
@@ -72,13 +71,14 @@ public final class ManagerConsumer implements Runnable {
                     record.topic(), record.partition(), record.offset(),
                     record.key(), record.value());
 
-            new FplManagerDBFactory().storeManagerFromJSON(record.value());
+            
+            new FplGameweekDbConnector().storeGameweekFromJSON(record.value());
 
         }
     }
 
     public void closeProducer() {
-        managerConsumer.close();
+        gamweekConsumer.close();
     }
 
     @Override
@@ -87,7 +87,7 @@ public final class ManagerConsumer implements Runnable {
     }
 
     public void shutdown() throws InterruptedException {
-        managerConsumer.wakeup();
+        gamweekConsumer.wakeup();
         latch.await();
     }
 
