@@ -10,7 +10,7 @@ import org.apache.kafka.common.serialization.StringSerializer;
 public class GameweekProducer {
     
     private KafkaProducer<String, String> gameweekProducer;
-    static String GAMEWEEK_TOPIC = "test"; 
+    static String GAMEWEEK_TOPIC = "fpl_gameweeks"; 
 
 
     public GameweekProducer() {

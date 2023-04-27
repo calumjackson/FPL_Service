@@ -3,7 +3,6 @@ package com.fplService.manager;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
 import com.fplService.httpService.HttpConnector;
-import com.fplService.managerDatabase.FplManagerDBFactory;
 
 
 public class FplManagerFactory {
@@ -13,8 +12,6 @@ public class FplManagerFactory {
         FplManager fplManager = requestFplManagerDetails(managerId);
 
         try {
-            // Store in the database.
-            new FplManagerDBFactory().storeManager(fplManager);
             
             ManagerProducer managerProducer = new ManagerProducer();
 

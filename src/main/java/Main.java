@@ -1,5 +1,7 @@
 import com.fplService.databaseConnection.FplDatabaseConnector;
 import com.fplService.gameweek.FplGameweekFactory;
+import com.fplService.gameweek.GameweekConsumer;
+import com.fplService.gameweek.GameweekConsumerCloser;
 import com.fplService.league.FplLeague;
 import com.fplService.league.FplLeagueFactory;
 import com.fplService.manager.FplManagerFactory;
@@ -15,7 +17,8 @@ public class Main {
 
     public static void main(String[] args) {
 
-        ManagerConsumer consumer = null;
+        ManagerConsumer managerConsumer = null;
+        GameweekConsumer gameweekConsumer = null;
 
         try {
             
@@ -25,29 +28,37 @@ public class Main {
             // Get the league details
             FplLeague fplLeague = new FplLeagueFactory().createFplLeage(leagueId);
             List<Integer> managerIds = fplLeague.getManagerIds();
-
+            
             CountDownLatch latch = new CountDownLatch(1); 
-            consumer = new ManagerConsumer(latch);
-            new Thread(consumer).start();
+            managerConsumer = new ManagerConsumer(latch);
+            new Thread(managerConsumer).start();
+
+            gameweekConsumer = new GameweekConsumer(latch);
+            new Thread(gameweekConsumer).start();
 
 
             // Create all the managers in the league
              for (Integer managerId : managerIds) {
                 new FplManagerFactory().createFplManager(managerId);
              }
-
+             
             // Get the gameweek totals for each manager.
             for (Integer managerId : managerIds) {
                 populateGameweekTotals(managerId);
-            }
+             }
 
         } catch (Exception e){
             e.printStackTrace();
         } finally {
             closeDatabase();
-            Runtime.getRuntime().addShutdownHook(new Thread(new ManagerConsumerCloser(consumer)));
+            Runtime.getRuntime().addShutdownHook(new Thread(new ManagerConsumerCloser(managerConsumer)));
+            Runtime.getRuntime().addShutdownHook(new Thread(new GameweekConsumerCloser(gameweekConsumer)));
         }
-
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         System.exit(0);
     }
 

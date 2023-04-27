@@ -4,6 +4,7 @@ import java.sql.*;
 
 import com.fplService.databaseConnection.FplDatabaseConnector;
 import com.fplService.manager.FplManager;
+import com.google.gson.Gson;
 
 public class FplManagerDBFactory {
 
@@ -35,6 +36,10 @@ public class FplManagerDBFactory {
 
         }
         
+    }
+
+    public void storeManagerFromJSON(String managerJSON) {
+        storeManager(new Gson().fromJson((managerJSON), FplManager.class));
     }
 
     public Integer getManagerCount() throws SQLException {
@@ -160,6 +165,8 @@ public class FplManagerDBFactory {
         return results;
 
     }
+
+
 
     private void closeStatements(Statement stmt, PreparedStatement pStmt) {
         try {

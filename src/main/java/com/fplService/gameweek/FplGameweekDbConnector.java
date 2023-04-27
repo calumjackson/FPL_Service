@@ -3,10 +3,15 @@ package com.fplService.gameweek;
 import java.sql.*;
 
 import com.fplService.databaseConnection.FplDatabaseConnector;
+import com.google.gson.Gson;
 
 public class FplGameweekDbConnector {
     
     Connection dbConnection;
+
+    public void storeGameweekFromJSON(String gameweekJSON) {
+        storeGameweek(new Gson().fromJson((gameweekJSON), FplGameweek.class));
+    }
 
     public void storeGameweek(FplGameweek gameweek)  {
         
@@ -62,4 +67,8 @@ public class FplGameweekDbConnector {
             pStmt.close();
         }
     }
+
+
+
+    
 }
