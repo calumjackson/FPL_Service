@@ -1,5 +1,6 @@
 package com.fplService.databaseConnection;
 
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,6 +14,9 @@ public class DatabaseUtilHelper {
     
     Connection dbConnection;
     Logger logger;
+
+    public static String fplManagersTable = "fpl_managers";
+    public static String fplGameweekTable = "fpl_gameweeks";
 
     public DatabaseUtilHelper() {
 
@@ -32,50 +36,27 @@ public class DatabaseUtilHelper {
         }
     }
 
-
-    
-
-    public void deleteAllManagers() throws SQLException {
+    public void deleteAllRecordsFromTable(String tableName) throws SQLException {
 
         dbConnection = FplDatabaseConnector.getFplDbConnection();
 
-        String deleteQuery = "DELETE FROM fpl_managers";
+        String deleteQuery = "DELETE FROM " + tableName;
         Statement stmt = dbConnection.createStatement();
         PreparedStatement pStmt = dbConnection.prepareStatement(deleteQuery);
         executeStatement(stmt, pStmt);
          
     }
 
-    public void deleteAllGameweeks() throws SQLException {
-
-        dbConnection = FplDatabaseConnector.getFplDbConnection();
-
-        String deleteQuery = "DELETE FROM fpl_gameweeks";
-        Statement stmt = dbConnection.createStatement();
-        PreparedStatement pStmt = dbConnection.prepareStatement(deleteQuery);
-        executeStatement(stmt, pStmt);
-         
-    }
 
     public boolean doesManagerRecordExist(String managerId) {
 
-        Statement stmt = null;
-        PreparedStatement pStmt = null;
-        ResultSet managerCountQuery = null;
         Boolean managerExists = false;
+        String tableName = "fpl_managers";
 
         try {
             dbConnection = FplDatabaseConnector.getFplDbConnection();    
             
-            String selectQuery = "Select count(*) managerCount FROM fpl_managers where manager_id = ?";
-            stmt = dbConnection.createStatement();
-            pStmt = dbConnection.prepareStatement(selectQuery);
-            pStmt.setInt(1, Integer.parseInt(managerId));
-
-            
-            managerCountQuery = executeQueryStatement(stmt, pStmt);
-            managerCountQuery.next();
-            Integer managerCount = managerCountQuery.getInt("managerCount");
+            Integer managerCount = getRecordCount(tableName, managerId);
             logger.info("Test Managers Found: " + managerCount);
             if (managerCount==1) {
                 managerExists = true;
@@ -85,10 +66,7 @@ public class DatabaseUtilHelper {
             e.printStackTrace();
         } finally {
             try {
-
-                managerCountQuery.close();
                 dbConnection.close();
-                closeStatements(stmt, pStmt);
             } catch (SQLException e) {
                 logger.info(e.getMessage());
             }
@@ -100,23 +78,14 @@ public class DatabaseUtilHelper {
 
     public boolean doesGameweekRecordExist(String managerId) {
 
-        Statement stmt = null;
-        PreparedStatement pStmt = null;
-        ResultSet gameweekCountQuery = null;
         Boolean gameweekExists = false;
 
         try {
             dbConnection = FplDatabaseConnector.getFplDbConnection();    
             
-            String selectQuery = "Select count(*) gameweekCount FROM fpl_gameweeks where manager_id = ?";
-            stmt = dbConnection.createStatement();
-            pStmt = dbConnection.prepareStatement(selectQuery);
-            pStmt.setInt(1, Integer.parseInt(managerId));
+            String tableName = "fpl_gameweeks";
+            Integer gameweekCount = getRecordCount(tableName, managerId);
 
-            
-            gameweekCountQuery = executeQueryStatement(stmt, pStmt);
-            gameweekCountQuery.next();
-            Integer gameweekCount = gameweekCountQuery.getInt("gameweekCount");
             logger.info("Test Gameweeks Found: " + gameweekCount);
             if (gameweekCount==1) {
                 gameweekExists = true;
@@ -126,10 +95,7 @@ public class DatabaseUtilHelper {
             e.printStackTrace();
         } finally {
             try {
-
-                gameweekCountQuery.close();
                 dbConnection.close();
-                closeStatements(stmt, pStmt);
             } catch (SQLException e) {
                 logger.info(e.getMessage());
             }
@@ -139,6 +105,52 @@ public class DatabaseUtilHelper {
 
     }
 
+    public Integer getRecordCount(String tableName, String managerId) { 
+        Statement stmt = null;
+        PreparedStatement pStmt = null;
+
+        String query = "select count(*) recordCount from " + tableName + " where manager_id = ?";
+        Integer recordCount = -1;
+        ResultSet gameweekCountQuery = null;
+        
+        try {
+            stmt = dbConnection.createStatement();
+            pStmt = dbConnection.prepareStatement(query);
+            pStmt.setInt(1, Integer.parseInt(managerId));
+            gameweekCountQuery = executeQueryStatement(stmt, pStmt);
+            gameweekCountQuery.next();
+            recordCount = gameweekCountQuery.getInt("recordCount");
+        } catch (Exception e) {
+                e.printStackTrace();
+        } finally {
+            closeStatements(stmt, pStmt);
+        }
+        return recordCount;
+    }
+
+    public Integer getRecordCount(String tableName) {
+        Integer recordCount = -1;
+        ResultSet gameweekCountQuery = null;
+        Statement stmt = null;
+        PreparedStatement pStmt = null;
+        String query = "select count(*) recordCount from " + tableName;
+
+        try {
+            stmt = dbConnection.createStatement();
+             pStmt = dbConnection.prepareStatement(query);
+            gameweekCountQuery = executeQueryStatement(stmt, pStmt);
+            gameweekCountQuery.next();
+            recordCount = gameweekCountQuery.getInt("recordCount");
+        } catch (Exception e) {
+                e.printStackTrace();
+                
+        } finally {
+            closeStatements(stmt, pStmt);
+        }
+        return recordCount;
+    }
+
+    
     private ResultSet executeQueryStatement(Statement stmt, PreparedStatement pStmt) throws SQLException {
         ResultSet results = null;
         try {

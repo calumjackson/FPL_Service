@@ -1,12 +1,6 @@
 package com.fplService.manager;
 
 import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.util.Properties;
@@ -23,11 +17,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fplService.databaseConnection.DatabaseUtilHelper;
-import com.fplService.managerDatabase.FplManagerDBFactory;
 
 public class FPLManagerFactoryTest {
 
-    private FplManager testFplManager = null;
     private DatabaseUtilHelper databaseHelper = null;
     Logger logger;
 
@@ -35,10 +27,9 @@ public class FPLManagerFactoryTest {
     public void setUpTestManager() {
 
         logger = LoggerFactory.getLogger(FPLManagerFactoryTest.class);
-        this.testFplManager = new FplManager(2046938, "Tom", "Litherland", "Test Team Name");
         this.databaseHelper = new DatabaseUtilHelper();
         try {
-            databaseHelper.deleteAllManagers();
+            databaseHelper.deleteAllRecordsFromTable(DatabaseUtilHelper.fplManagersTable);
         } catch (SQLException e) {
             logger.info(e.getMessage());
         }
@@ -47,7 +38,7 @@ public class FPLManagerFactoryTest {
     @After
     public void closeDatabase() throws SQLException {
         databaseHelper.closeConnection();
-        databaseHelper.deleteAllManagers();
+        databaseHelper.deleteAllRecordsFromTable(DatabaseUtilHelper.fplManagersTable);
     }
 
     static String testManagerId = "2046938";
@@ -76,12 +67,7 @@ public class FPLManagerFactoryTest {
     @Test
     public void testReceiveMessage() {
 
-        System.out.println("Testing start");
-
-
         assertFalse(databaseHelper.doesManagerRecordExist(testManagerId));
-        FplManagerDBFactory fplManagerDBFactory = mock(FplManagerDBFactory.class);
-        doNothing().when(fplManagerDBFactory).storeManagerFromJSON(anyString());
 
         publishMessage(testManagerJson);
         CountDownLatch latch = new CountDownLatch(1);

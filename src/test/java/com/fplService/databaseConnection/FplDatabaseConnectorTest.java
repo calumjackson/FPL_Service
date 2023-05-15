@@ -5,15 +5,16 @@ import static org.junit.Assert.assertNotNull;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import org.junit.After;
 import org.junit.Test;
 
 public class FplDatabaseConnectorTest {
 
+    static Connection connection;
     
     @Test
     public void testDatabaseConnection() {
 
-        Connection connection = null;
         try {
             connection = FplDatabaseConnector.getFplDbConnection();
         } catch (SQLException e) {
@@ -22,6 +23,11 @@ public class FplDatabaseConnectorTest {
         assertNotNull(connection);
 
     } 
+
+    @After
+    public void CloseConnection() throws SQLException {
+        FplDatabaseConnector.closeDatabaseConnection();
+    }
 
 
     

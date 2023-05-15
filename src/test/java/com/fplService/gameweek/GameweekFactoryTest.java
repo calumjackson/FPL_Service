@@ -6,8 +6,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.util.Properties;
@@ -33,7 +31,7 @@ public class GameweekFactoryTest {
         logger = LoggerFactory.getLogger(GameweekFactoryTest.class);
         databaseHelper = new DatabaseUtilHelper();
         try {
-            databaseHelper.deleteAllGameweeks();
+            databaseHelper.deleteAllRecordsFromTable(DatabaseUtilHelper.fplGameweekTable);
         } catch (SQLException e) {
             logger.info(e.getMessage());
         }
@@ -42,7 +40,7 @@ public class GameweekFactoryTest {
     @After
     public void closeDatabase() {
         try {
-            databaseHelper.deleteAllGameweeks();
+            databaseHelper.deleteAllRecordsFromTable(DatabaseUtilHelper.fplGameweekTable);
         } catch (SQLException e) {
             logger.info(e.getMessage());
         }
