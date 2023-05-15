@@ -17,7 +17,7 @@ public class FplDatabaseConnector {
     private static Connection connectToPostgresDatabase() throws SQLException {
 
         try {
-            connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/fplService", "calumjackson", "");
+            connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/calumjackson", "calumjackson", "postgres");
             // System.out.println("Connected to Database");
 
         } catch (SQLException e) {

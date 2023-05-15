@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Main",
+            "request": "launch",
+            "mainClass": "Main",
+            "projectName": "FPL_Service"
+        },
+        {
+            "outputCapture": "std"
+        }
+    ]
+}

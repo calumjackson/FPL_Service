@@ -38,6 +38,7 @@ public class GameweekProducer {
     }  
 
     public void closeProducer() {
+        gameweekProducer.flush();
         gameweekProducer.close();
     }
 
