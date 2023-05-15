@@ -4,7 +4,6 @@ import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -20,52 +19,43 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.fplService.databaseConnection.DatabaseUtilHelper;
 import com.fplService.managerDatabase.FplManagerDBFactory;
 
 public class FPLManagerFactoryTest {
 
-    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-    private final PrintStream originalOut = System.out;
     private FplManager testFplManager = null;
-
-    @Before
-    public void setUpStreams() {
-        System.setOut(new PrintStream(outContent));
-    }
-
-    @Before
-    public void clearDB() {
-        try {
-            new FplManagerDBFactory().deleteAllManagers();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
+    private DatabaseUtilHelper databaseHelper = null;
+    Logger logger;
 
     @Before
     public void setUpTestManager() {
+
+        logger = LoggerFactory.getLogger(FPLManagerFactoryTest.class);
         this.testFplManager = new FplManager(2046938, "Tom", "Litherland", "Test Team Name");
+        this.databaseHelper = new DatabaseUtilHelper();
+        try {
+            databaseHelper.deleteAllManagers();
+        } catch (SQLException e) {
+            logger.info(e.getMessage());
+        }
     }
 
     @After
-    public void restoreStreams() {
-        System.setOut(originalOut);
+    public void closeDatabase() throws SQLException {
+        databaseHelper.closeConnection();
+        databaseHelper.deleteAllManagers();
     }
 
-    // @After
-    // public void burnDownDB() {
-    //     try {
-    //         new FplManagerDBFactory().deleteAllManagers();
-    //     } catch (SQLException e) {
-    //         e.printStackTrace();
-    //     }
-    // }
-    
-
+    static String testManagerId = "2046938";
     static String testManagerJson = "{ \"managerFirstName\": \"Tom\", " + 
-    "\"managerLastName\": \"Litherland\", \"managerId\": \"2046938\"," + 
+    "\"managerLastName\": \"Litherland\", \"managerId\": \""+testManagerId+"\"," + 
     " \"teamName\": \"Klopps n Robbers\" }";
+
+    static
 
     public void publishMessage(String testMessage) {
 
@@ -86,30 +76,23 @@ public class FPLManagerFactoryTest {
     @Test
     public void testReceiveMessage() {
 
+        System.out.println("Testing start");
+
+
+        assertFalse(databaseHelper.doesManagerRecordExist(testManagerId));
         FplManagerDBFactory fplManagerDBFactory = mock(FplManagerDBFactory.class);
         doNothing().when(fplManagerDBFactory).storeManagerFromJSON(anyString());
 
         publishMessage(testManagerJson);
         CountDownLatch latch = new CountDownLatch(1);
         ManagerConsumer managerConsumer = new ManagerConsumer(latch);
-
-        managerConsumer.createTeamConsumer();
         
-        managerConsumer.pollManagerConsumer(Duration.ofMillis(1000));
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        managerConsumer.pollManagerConsumer(Duration.ofMillis(10000));
 
         managerConsumer.closeProducer();
 
-        // Check that the system message contains the JSON. Cannot exact search due to offsets changing.
-        assertTrue(outContent.toString().contains(testManagerJson));
-        
-        
-        
-
+        assertTrue(databaseHelper.doesManagerRecordExist(testManagerId));
+  
     }
     
 }
