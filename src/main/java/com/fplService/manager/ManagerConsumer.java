@@ -8,6 +8,8 @@ import java.util.concurrent.CountDownLatch;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.errors.WakeupException;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fplService.managerDatabase.FplManagerDBFactory;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -45,9 +47,7 @@ public final class ManagerConsumer implements Runnable {
 
     public void receiveMessage() {
 
-        ;
-
-        Duration timeout = Duration.ofMillis(100);
+        Duration timeout = Duration.ofMillis(1000);
         try {
 
             while (true) {
@@ -57,6 +57,7 @@ public final class ManagerConsumer implements Runnable {
         } catch (WakeupException e) {
             System.out.println("Woken up");
         } finally {
+            managerConsumer.commitAsync();
             managerConsumer.close();
             latch.countDown();
         }
@@ -64,16 +65,22 @@ public final class ManagerConsumer implements Runnable {
     }
 
     void pollManagerConsumer(Duration timeout) {
+
+        Logger logger = LoggerFactory.getLogger(ManagerConsumer.class);
+
+        logger.info("Logging messages");
+
         ConsumerRecords<String, String> records = managerConsumer.poll(timeout);
 
+        logger.info("Number of records " + records.count());
+
         for (ConsumerRecord<String, String> record : records) {
-            System.out.printf("topic = %s, partition = %d, offset = %d, " +
+            logger.debug("topic = %s, partition = %d, offset = %d, " +
                     "customer = %s, country = %s\n",
                     record.topic(), record.partition(), record.offset(),
                     record.key(), record.value());
 
             new FplManagerDBFactory().storeManagerFromJSON(record.value());
-
         }
     }
 

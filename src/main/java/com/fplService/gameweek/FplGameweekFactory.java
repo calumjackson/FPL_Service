@@ -20,8 +20,6 @@ public class FplGameweekFactory {
 
                 gameweekProducer.sendMessage(gameweekRecord);
                 
-                // new FplGameweekDbConnector().storeGameweek(gameweek);
-
         }
 
         gameweekProducer.closeProducer();

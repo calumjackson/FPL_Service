@@ -32,11 +32,12 @@ public class ManagerProducer {
 
     public void sendMessage(ProducerRecord<String, String> producerRecord) {
 
-        managerProducer.send(producerRecord);
+        managerProducer.send(producerRecord);        
 
     }  
-
+    
     public void closeProducer() {
+        managerProducer.flush();
         managerProducer.close();
     }
 }
