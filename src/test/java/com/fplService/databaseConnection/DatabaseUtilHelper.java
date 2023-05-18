@@ -10,7 +10,7 @@ import java.sql.Statement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fplService.databaseUtils.FplDatabaseConnector;
+import com.fplService.databaseUtils.DatasourcePool;
 
 public class DatabaseUtilHelper {
     
@@ -24,29 +24,26 @@ public class DatabaseUtilHelper {
 
         logger = LoggerFactory.getLogger(DatabaseUtilHelper.class);
         try {
-            dbConnection = FplDatabaseConnector.getFplDbConnection();
+            dbConnection = DatasourcePool.getDatabaseConnection();
             } catch (Exception e) {
                 logger.info(e.getStackTrace().toString());
         }
     }
 
     public void closeConnection() {
-        try {
-            FplDatabaseConnector.closeDatabaseConnection();
-        } catch (SQLException e) {
-            logger.info(e.getStackTrace().toString());
-        }
-    }
+        DatasourcePool.closeConnectionPool();
+    }   
 
     public void deleteAllRecordsFromTable(String tableName) throws SQLException {
 
-        dbConnection = FplDatabaseConnector.getFplDbConnection();
+        dbConnection = DatasourcePool.getDatabaseConnection();
 
         String deleteQuery = "DELETE FROM " + tableName;
         Statement stmt = dbConnection.createStatement();
         PreparedStatement pStmt = dbConnection.prepareStatement(deleteQuery);
         executeStatement(stmt, pStmt);
          
+        dbConnection.close();
     }
 
 
@@ -56,7 +53,7 @@ public class DatabaseUtilHelper {
         String tableName = "fpl_managers";
 
         try {
-            dbConnection = FplDatabaseConnector.getFplDbConnection();    
+            dbConnection = DatasourcePool.getDatabaseConnection();    
             
             Integer managerCount = getRecordCount(tableName, managerId);
             logger.info("Test Managers Found: " + managerCount);
@@ -83,7 +80,7 @@ public class DatabaseUtilHelper {
         Boolean gameweekExists = false;
 
         try {
-            dbConnection = FplDatabaseConnector.getFplDbConnection();    
+            dbConnection = DatasourcePool.getDatabaseConnection(); 
             
             String tableName = "fpl_gameweeks";
             Integer gameweekCount = getRecordCount(tableName, managerId);
@@ -118,7 +115,7 @@ public class DatabaseUtilHelper {
         ResultSet gameweekCountQuery = null;
         
         try {
-            dbConnection = FplDatabaseConnector.getFplDbConnection();    
+            dbConnection = DatasourcePool.getDatabaseConnection();     
             stmt = dbConnection.createStatement();
             pStmt = dbConnection.prepareStatement(query);
             pStmt.setInt(1, Integer.parseInt(managerId));
@@ -129,6 +126,7 @@ public class DatabaseUtilHelper {
                 e.printStackTrace();
         } finally {
             closeStatements(stmt, pStmt);
+            closeConnection();
         }
         return recordCount;
     }
@@ -142,7 +140,7 @@ public class DatabaseUtilHelper {
 
         
         try {
-            dbConnection = FplDatabaseConnector.getFplDbConnection();    
+            dbConnection = DatasourcePool.getDatabaseConnection();    
             stmt = dbConnection.createStatement();
              pStmt = dbConnection.prepareStatement(query);
             gameweekCountQuery = executeQueryStatement(stmt, pStmt);

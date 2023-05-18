@@ -7,6 +7,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fplService.databaseUtils.DatasourcePool;
 import com.fplService.databaseUtils.FplDatabaseConnector;
 import com.google.gson.Gson;
 
@@ -14,26 +15,28 @@ public class FplGameweekDbConnector {
 
     Connection dbConnection;
 
-    public void storeGameweeksJSON(ConsumerRecords<String, String> records) {
+    public void storeGameweeksJSON(ConsumerRecords<String, String> records) throws SQLException {
 
         Logger logger = LoggerFactory.getLogger(FplDatabaseConnector.class);
 
         try {
-            dbConnection = FplDatabaseConnector.getFplDbConnection();
-       
+            dbConnection = DatasourcePool.getDatabaseConnection();
+            logger.info("Is gameweek database closed: " + dbConnection.isClosed());
+            // dbConnection = FplDatabaseConnector.getFplDbConnection();
+            
             for (ConsumerRecord<String, String> record : records) {
                 logger.debug("topic = %s, partition = %d, offset = %d, " +
-                        "customer = %s, country = %s\n",
-                        record.topic(), record.partition(), record.offset(),
-                        record.key(), record.value());
-
+                "customer = %s, country = %s\n",
+                record.topic(), record.partition(), record.offset(),
+                record.key(), record.value());
+                
                 storeGameweekFromJSON(record.value());
-        }
-
+            }
+            
         } catch (SQLException e) {
-            logger.info(e.getMessage());        
-        } 
-
+            logger.info("Cannot connect to database");
+            throw e;
+        }
     }
 
     public void storeGameweekFromJSON(String gameweekJSON) {

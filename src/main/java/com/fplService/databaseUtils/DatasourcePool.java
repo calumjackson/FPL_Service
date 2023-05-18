@@ -27,23 +27,35 @@ public class DatasourcePool {
 		dataSource = new HikariDataSource(config);
 	}
 
-    public static Connection getDatabaseConnection() {
+    public static Connection getDatabaseConnection() throws SQLException {
         logger = LoggerFactory.getLogger(DatasourcePool.class);
-        Connection connection = null;
         try {
-            connection = dataSource.getConnection();
-            if (connection.isClosed()) {
+            
+            if (dataSource.isClosed()) {
                 initiateDatabasePool();
                 return dataSource.getConnection();
             }
         } catch (SQLException e) {
             logger.info(e.getMessage());
+            throw e;
         }
-        return connection;
+        return dataSource.getConnection();
     }
 
     public static void closeConnectionPool() {
         dataSource.close();
+    }
+
+    public static Integer getActiveConnections() {
+        return dataSource.getHikariPoolMXBean().getActiveConnections();
+    }
+
+    public static Integer getIdleConnections() {
+        return dataSource.getHikariPoolMXBean().getIdleConnections();
+    }
+
+    public static Integer getAwaitingConnections() {
+        return dataSource.getHikariPoolMXBean().getThreadsAwaitingConnection();
     }
     
 }

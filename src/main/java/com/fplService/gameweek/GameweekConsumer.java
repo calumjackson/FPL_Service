@@ -1,5 +1,6 @@
 package com.fplService.gameweek;
 
+import java.sql.SQLException;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Properties;
@@ -72,8 +73,12 @@ public final class GameweekConsumer implements Runnable {
         ConsumerRecords<String, String> records = gamweekConsumer.poll(timeout);
 
         logger.info("Number of gameweeks in poll :" + records.count());
-
-        new FplGameweekDbConnector().storeGameweeksJSON(records);
+        
+        try {
+            new FplGameweekDbConnector().storeGameweeksJSON(records);
+        } catch (SQLException e) {
+            logger.info(e.getMessage());
+        }
         
     }
 

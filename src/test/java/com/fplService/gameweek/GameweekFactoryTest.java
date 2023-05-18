@@ -2,10 +2,8 @@ package com.fplService.gameweek;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
 
 import java.sql.SQLException;
 import java.time.Duration;
@@ -17,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fplService.databaseConnection.DatabaseUtilHelper;
+import com.fplService.databaseUtils.DatasourcePool;
 import com.fplService.databaseUtils.FplDatabaseConnector;
 
 public class GameweekFactoryTest {
@@ -26,6 +25,7 @@ public class GameweekFactoryTest {
 
     @Before
     public void setupTestConfigs() throws SQLException {
+        DatasourcePool.initiateDatabasePool();
         FplDatabaseConnector.getFplDbConnection();
         logger = LoggerFactory.getLogger(GameweekFactoryTest.class);
         databaseHelper = new DatabaseUtilHelper();
@@ -65,12 +65,10 @@ public class GameweekFactoryTest {
     }
 
     @Test
-    public void testReceiveMessage() {
-
-        FplGameweekDbConnector fplGameweekDBFactory = mock(FplGameweekDbConnector.class);
-        doNothing().when(fplGameweekDBFactory).storeGameweekFromJSON(anyString());
+    public void testReceiveMessage() throws SQLException {
         
         assertFalse(databaseHelper.doesGameweekRecordExist(testManagerId));
+        assertNotNull(DatasourcePool.getDatabaseConnection());
         
         publishMessage(testGameweekJSON);
         GameweekProducer.closeProducer();
