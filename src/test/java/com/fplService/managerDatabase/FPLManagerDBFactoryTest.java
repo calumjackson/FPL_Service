@@ -5,6 +5,8 @@ import java.sql.SQLException;
 
 import org.junit.Test;
 
+import com.fplService.databaseUtils.FplManagerDBFactory;
+
 public class FPLManagerDBFactoryTest {
     
     @Test

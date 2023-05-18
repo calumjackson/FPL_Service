@@ -8,6 +8,8 @@ import java.sql.SQLException;
 import org.junit.After;
 import org.junit.Test;
 
+import com.fplService.databaseUtils.FplDatabaseConnector;
+
 public class FplDatabaseConnectorTest {
 
     static Connection connection;

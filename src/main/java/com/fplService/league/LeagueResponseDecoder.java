@@ -11,8 +11,6 @@ public class LeagueResponseDecoder {
 
         LeagueDataShell data = null;
         data = new Gson().fromJson((responseBody), LeagueDataShell.class);
-        // System.out.println(new Gson().toJson(data));
-
 
         List<Integer> managerIds = data.getStandings().getManagerIds();
         return managerIds;

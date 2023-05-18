@@ -1,4 +1,4 @@
-package com.fplService.managerDatabase;
+package com.fplService.databaseUtils;
 
 import java.sql.*;
 
@@ -7,7 +7,6 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fplService.databaseConnection.FplDatabaseConnector;
 import com.fplService.manager.FplManager;
 import com.google.gson.Gson;
 

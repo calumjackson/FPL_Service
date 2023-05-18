@@ -1,8 +1,11 @@
-package com.fplService.databaseConnection;
+package com.fplService.databaseUtils;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class FplDatabaseConnector {
@@ -15,11 +18,10 @@ public class FplDatabaseConnector {
     }
 
     private static Connection connectToPostgresDatabase() throws SQLException {
-
+        Logger logger = LoggerFactory.getLogger(FplDatabaseConnector.class);
         try {
             connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/calumjackson", "calumjackson", "postgres");
-            // System.out.println("Connected to Database");
-
+            logger.info("Connected to database");
         } catch (SQLException e) {
             System.out.println("Error: Not connected to Database");
             throw e;

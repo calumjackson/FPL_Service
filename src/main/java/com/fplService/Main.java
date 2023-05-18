@@ -1,15 +1,9 @@
-import com.fplService.databaseConnection.FplDatabaseConnector;
-import com.fplService.gameweek.FplGameweekFactory;
-import com.fplService.gameweek.GameweekConsumer;
-import com.fplService.gameweek.GameweekConsumerCloser;
-import com.fplService.gameweek.GameweekProducer;
-import com.fplService.league.FplLeague;
-import com.fplService.league.FplLeagueFactory;
-import com.fplService.manager.FplManagerFactory;
-import com.fplService.manager.ManagerConsumer;
-import com.fplService.manager.ManagerConsumerCloser;
-import com.fplService.manager.ManagerProducer;
-import com.fplService.managerDatabase.FplManagerDBFactory;
+package com.fplService;
+
+import com.fplService.manager.*;
+import com.fplService.databaseUtils.*;
+import com.fplService.gameweek.*;
+import com.fplService.league.*;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -18,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 public class Main {
 

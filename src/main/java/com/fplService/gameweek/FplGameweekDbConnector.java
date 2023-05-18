@@ -7,11 +7,10 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fplService.databaseConnection.FplDatabaseConnector;
+import com.fplService.databaseUtils.FplDatabaseConnector;
 import com.google.gson.Gson;
 
 public class FplGameweekDbConnector {
-    
 
     Connection dbConnection;
 
@@ -22,14 +21,13 @@ public class FplGameweekDbConnector {
         try {
             dbConnection = FplDatabaseConnector.getFplDbConnection();
        
+            for (ConsumerRecord<String, String> record : records) {
+                logger.debug("topic = %s, partition = %d, offset = %d, " +
+                        "customer = %s, country = %s\n",
+                        record.topic(), record.partition(), record.offset(),
+                        record.key(), record.value());
 
-        for (ConsumerRecord<String, String> record : records) {
-            logger.debug("topic = %s, partition = %d, offset = %d, " +
-                    "customer = %s, country = %s\n",
-                    record.topic(), record.partition(), record.offset(),
-                    record.key(), record.value());
-
-            storeGameweekFromJSON(record.value());
+                storeGameweekFromJSON(record.value());
         }
 
         } catch (SQLException e) {
