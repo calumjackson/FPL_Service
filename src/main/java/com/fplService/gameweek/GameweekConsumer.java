@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.errors.WakeupException;
@@ -11,7 +12,6 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 
 public final class GameweekConsumer implements Runnable {
@@ -46,7 +46,7 @@ public final class GameweekConsumer implements Runnable {
 
     public void receiveMessage() {
 
-        Duration timeout = Duration.ofMillis(1000);
+        Duration timeout = Duration.ofMillis(10000);
 
         try {
 
@@ -55,7 +55,7 @@ public final class GameweekConsumer implements Runnable {
                 pollGameweekConsumer(timeout);
             }
         } catch (WakeupException e) {
-            System.out.println("Woken up");
+            System.out.println("Gameweek Consumer Woken up");
         } finally {
             gamweekConsumer.commitAsync();
             gamweekConsumer.close();
@@ -72,16 +72,9 @@ public final class GameweekConsumer implements Runnable {
         ConsumerRecords<String, String> records = gamweekConsumer.poll(timeout);
 
         logger.info("Number of gameweeks in poll :" + records.count());
+
+        new FplGameweekDbConnector().storeGameweeksJSON(records);
         
-        for (ConsumerRecord<String, String> record : records) {
-            logger.debug("topic = %s, partition = %d, offset = %d, " +
-                    "customer = %s, country = %s\n",
-                    record.topic(), record.partition(), record.offset(),
-                    record.key(), record.value());
-
-            new FplGameweekDbConnector().storeGameweekFromJSON(record.value());
-
-        }
     }
 
     public void closeConsumer() {
@@ -95,7 +88,8 @@ public final class GameweekConsumer implements Runnable {
 
     public void shutdown() throws InterruptedException {
         gamweekConsumer.wakeup();
-        latch.await();
-    }
+        latch.await(4, TimeUnit.SECONDS);   
+     }
 
 }
+    

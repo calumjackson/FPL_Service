@@ -6,10 +6,12 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GameweekProducer {
     
-    private KafkaProducer<String, String> gameweekProducer;
+    private static KafkaProducer<String, String> gameweekProducer;
     static String GAMEWEEK_TOPIC = "fpl_gameweeks"; 
 
 
@@ -17,8 +19,10 @@ public class GameweekProducer {
         createGameweekProducer();
     }
 
-    public void createGameweekProducer() {
+    public static void createGameweekProducer() {
 
+        Logger logger = LoggerFactory.getLogger(GameweekProducer.class);
+    
         String boostrapServers = "localhost:9092"; 
     
             Properties producerProps = new Properties();
@@ -28,16 +32,17 @@ public class GameweekProducer {
     
             KafkaProducer<String, String> producer = new KafkaProducer<>(producerProps);
     
-            this.gameweekProducer = producer;
+            GameweekProducer.gameweekProducer = producer;
+            logger.debug("Setup: Producer added");
     }
 
-    public void sendMessage(ProducerRecord<String, String> producerRecord) {
+    public static void sendMessage(ProducerRecord<String, String> producerRecord) {
 
         gameweekProducer.send(producerRecord);
 
     }  
 
-    public void closeProducer() {
+    public static void closeProducer() {
         gameweekProducer.flush();
         gameweekProducer.close();
     }

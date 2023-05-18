@@ -1,5 +1,6 @@
 package com.fplService.gameweek;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -8,18 +9,15 @@ import static org.mockito.Mockito.mock;
 
 import java.sql.SQLException;
 import java.time.Duration;
-import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.serialization.StringSerializer;
 import org.junit.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fplService.databaseConnection.DatabaseUtilHelper;
+import com.fplService.databaseConnection.FplDatabaseConnector;
 
 public class GameweekFactoryTest {
     
@@ -27,9 +25,11 @@ public class GameweekFactoryTest {
     private Logger logger;
 
     @Before
-    public void setupTestConfigs() {
+    public void setupTestConfigs() throws SQLException {
+        FplDatabaseConnector.getFplDbConnection();
         logger = LoggerFactory.getLogger(GameweekFactoryTest.class);
         databaseHelper = new DatabaseUtilHelper();
+        GameweekProducer.createGameweekProducer();
         try {
             databaseHelper.deleteAllRecordsFromTable(DatabaseUtilHelper.fplGameweekTable);
         } catch (SQLException e) {
@@ -45,6 +45,7 @@ public class GameweekFactoryTest {
             logger.info(e.getMessage());
         }
         databaseHelper.closeConnection();
+        GameweekProducer.closeProducer();
     }
 
     static String testManagerId = "638102";
@@ -58,19 +59,9 @@ public class GameweekFactoryTest {
 
     public void publishMessage(String testMessage) {
 
-        String boostrapServers = "localhost:9092"; 
-    
-            Properties producerProps = new Properties();
-            producerProps.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, boostrapServers);
-            producerProps.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-            producerProps.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-    
-            KafkaProducer<String, String> testProducer = new KafkaProducer<>(producerProps);
             ProducerRecord<String, String> testManagerRecord = new ProducerRecord<String, String>(GameweekProducer.GAMEWEEK_TOPIC, testMessage);
 
-            testProducer.send(testManagerRecord);
-            testProducer.flush();
-            testProducer.close();
+            GameweekProducer.sendMessage(testManagerRecord);
     }
 
     @Test
@@ -78,21 +69,59 @@ public class GameweekFactoryTest {
 
         FplGameweekDbConnector fplGameweekDBFactory = mock(FplGameweekDbConnector.class);
         doNothing().when(fplGameweekDBFactory).storeGameweekFromJSON(anyString());
-
+        
         assertFalse(databaseHelper.doesGameweekRecordExist(testManagerId));
-
+        
         publishMessage(testGameweekJSON);
-        CountDownLatch latch = new CountDownLatch(1);
-        GameweekConsumer gameWeekConsumer = new GameweekConsumer(latch);
+        GameweekProducer.closeProducer();
+        GameweekConsumer gameWeekConsumer = new GameweekConsumer(new CountDownLatch(1));
         
         gameWeekConsumer.pollGameweekConsumer(Duration.ofMillis(15000));
 
         gameWeekConsumer.closeConsumer();
 
         assertTrue(databaseHelper.doesGameweekRecordExist(testManagerId));
-    
-    }
-    
 
+    }
+
+    @Test
+    public void testReceiveScaleMessage() {
+
+        Integer scale = 1000;
+        
+        assertFalse(databaseHelper.doesGameweekRecordExist(testManagerId));
+        
+        GameweekConsumer gameWeekConsumer = new GameweekConsumer(new CountDownLatch(1));
+        new Thread(gameWeekConsumer).start();
+        
+        for (int x =1; x <= scale; x++) { 
+            publishMessage(getGameweekTestString(x));
+        }
+        GameweekProducer.closeProducer();
+        
+        Runtime.getRuntime().addShutdownHook(new Thread(new GameweekConsumerCloser(gameWeekConsumer)));
+
+
+        try {
+            Thread.sleep(40000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        
+        assertEquals(scale, databaseHelper.getRecordCount(DatabaseUtilHelper.fplGameweekTable));
+    }
+
+    private String getGameweekTestString(Integer gameweekNumber) {
+
+        String gameweekJSON = "{\"managerId\": \""+testManagerId+"\", " + 
+                "\"gameweekId\": \""+gameweekNumber+"\", " +
+                "\"seasonId\": \"2022-23\", " + 
+                "\"gameweekPoints\": \"75\", " +
+                "\"gameweekBenchPoints\": \"0\", " +
+                "\"transferPointCosts\": \"6\"}";
+
+        return gameweekJSON;
+
+    }
 
 }

@@ -108,12 +108,15 @@ public class DatabaseUtilHelper {
     public Integer getRecordCount(String tableName, String managerId) { 
         Statement stmt = null;
         PreparedStatement pStmt = null;
-
+        
+        
+        
         String query = "select count(*) recordCount from " + tableName + " where manager_id = ?";
         Integer recordCount = -1;
         ResultSet gameweekCountQuery = null;
         
         try {
+            dbConnection = FplDatabaseConnector.getFplDbConnection();    
             stmt = dbConnection.createStatement();
             pStmt = dbConnection.prepareStatement(query);
             pStmt.setInt(1, Integer.parseInt(managerId));
@@ -135,12 +138,16 @@ public class DatabaseUtilHelper {
         PreparedStatement pStmt = null;
         String query = "select count(*) recordCount from " + tableName;
 
+        
         try {
+            dbConnection = FplDatabaseConnector.getFplDbConnection();    
             stmt = dbConnection.createStatement();
              pStmt = dbConnection.prepareStatement(query);
             gameweekCountQuery = executeQueryStatement(stmt, pStmt);
             gameweekCountQuery.next();
             recordCount = gameweekCountQuery.getInt("recordCount");
+
+            logger.info("Record Count: " + recordCount); 
         } catch (Exception e) {
                 e.printStackTrace();
                 

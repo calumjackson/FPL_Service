@@ -3,13 +3,9 @@ package com.fplService.manager;
 import static org.junit.Assert.*;
 import java.sql.SQLException;
 import java.time.Duration;
-import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
-
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.ProducerConfig;
+import java.util.concurrent.TimeUnit;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.serialization.StringSerializer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,6 +24,8 @@ public class FPLManagerFactoryTest {
 
         logger = LoggerFactory.getLogger(FPLManagerFactoryTest.class);
         this.databaseHelper = new DatabaseUtilHelper();
+        new ManagerProducer();
+
         try {
             databaseHelper.deleteAllRecordsFromTable(DatabaseUtilHelper.fplManagersTable);
         } catch (SQLException e) {
@@ -38,7 +36,9 @@ public class FPLManagerFactoryTest {
     @After
     public void closeDatabase() throws SQLException {
         databaseHelper.closeConnection();
-        databaseHelper.deleteAllRecordsFromTable(DatabaseUtilHelper.fplManagersTable);
+        // databaseHelper.deleteAllRecordsFromTable(DatabaseUtilHelper.fplManagersTable);
+
+        ManagerProducer.closeProducer();
     }
 
     static String testManagerId = "2046938";
@@ -48,20 +48,13 @@ public class FPLManagerFactoryTest {
 
     static
 
-    public void publishMessage(String testMessage) {
+    
 
-        String boostrapServers = "localhost:9092"; 
-    
-            Properties producerProps = new Properties();
-            producerProps.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, boostrapServers);
-            producerProps.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-            producerProps.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-    
-            KafkaProducer<String, String> testProducer = new KafkaProducer<>(producerProps);
+    public void publishMessage(String testMessage) {
+        
             ProducerRecord<String, String> testManagerRecord = new ProducerRecord<String, String>(ManagerProducer.MANAGER_TOPIC, testMessage);
 
-            testProducer.send(testManagerRecord);
-            testProducer.close();
+            ManagerProducer.sendMessage(testManagerRecord);
     }
 
     @Test
@@ -75,10 +68,69 @@ public class FPLManagerFactoryTest {
         
         managerConsumer.pollManagerConsumer(Duration.ofMillis(10000));
 
-        managerConsumer.closeProducer();
+        managerConsumer.closeConsumer();
 
         assertTrue(databaseHelper.doesManagerRecordExist(testManagerId));
   
+    }
+
+    @Test
+    public void testReceiveMessageScale() throws InterruptedException {
+
+        CountDownLatch latch = new CountDownLatch(1);
+        ManagerConsumer managerConsumer = new ManagerConsumer(latch);
+        new Thread(managerConsumer).start();
+
+        Integer scale = 1501;
+
+        assertFalse(databaseHelper.doesManagerRecordExist(testManagerId));
+
+
+        for (int x=1; x<=scale; x++) {
+            publishMessage(getManagerJSON("100"+String.valueOf(x)));
+        }
+        ManagerProducer.closeProducer();
+
+
+        Runtime.getRuntime().addShutdownHook(new Thread(new ManagerConsumerCloser(managerConsumer)));
+        latch.await(10, TimeUnit.SECONDS);
+
+        Integer value = databaseHelper.getRecordCount(DatabaseUtilHelper.fplManagersTable);
+        assertEquals(scale, value);
+    }
+
+    @Test
+    public void testReceiveMessageHugeScale() throws InterruptedException {
+
+        CountDownLatch latch = new CountDownLatch(1);
+        ManagerConsumer managerConsumer = new ManagerConsumer(latch);
+        new Thread(managerConsumer).start();
+
+        Integer scale = 20000;
+
+        assertFalse(databaseHelper.doesManagerRecordExist(testManagerId));
+
+
+        for (int x=1; x<=scale; x++) {
+            publishMessage(getManagerJSON("100"+String.valueOf(x)));
+        }
+        ManagerProducer.closeProducer();
+
+
+        Runtime.getRuntime().addShutdownHook(new Thread(new ManagerConsumerCloser(managerConsumer)));
+        latch.await(20, TimeUnit.SECONDS);
+
+        Integer value = databaseHelper.getRecordCount(DatabaseUtilHelper.fplManagersTable);
+        assertEquals(scale, value);
+    }
+
+    public String getManagerJSON(String managerId) {
+
+        String testManagerJson = "{ \"managerFirstName\": \"Tom\", " + 
+            "\"managerLastName\": \"Litherland\", \"managerId\": \""+managerId+"\"," + 
+            " \"teamName\": \"Klopps n Robbers\" }";
+
+        return testManagerJson;
     }
     
 }

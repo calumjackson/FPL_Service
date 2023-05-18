@@ -2,12 +2,41 @@ package com.fplService.gameweek;
 
 import java.sql.*;
 
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fplService.databaseConnection.FplDatabaseConnector;
 import com.google.gson.Gson;
 
 public class FplGameweekDbConnector {
     
+
     Connection dbConnection;
+
+    public void storeGameweeksJSON(ConsumerRecords<String, String> records) {
+
+        Logger logger = LoggerFactory.getLogger(FplDatabaseConnector.class);
+
+        try {
+            dbConnection = FplDatabaseConnector.getFplDbConnection();
+       
+
+        for (ConsumerRecord<String, String> record : records) {
+            logger.debug("topic = %s, partition = %d, offset = %d, " +
+                    "customer = %s, country = %s\n",
+                    record.topic(), record.partition(), record.offset(),
+                    record.key(), record.value());
+
+            storeGameweekFromJSON(record.value());
+        }
+
+        } catch (SQLException e) {
+            logger.info(e.getMessage());        
+        } 
+
+    }
 
     public void storeGameweekFromJSON(String gameweekJSON) {
         storeGameweek(new Gson().fromJson((gameweekJSON), FplGameweek.class));
@@ -17,10 +46,7 @@ public class FplGameweekDbConnector {
         
         try {
             
-            dbConnection = FplDatabaseConnector.getFplDbConnection();
-
             String insertQuery = "INSERT INTO fpl_gameweeks(manager_id, gameweek_id, season_id, week_points, bench_points, transfer_point_deductions) VALUES (?, ?, ?, ?, ?, ?)";
-            
             Statement stmt = dbConnection.createStatement();
             PreparedStatement pStmt = dbConnection.prepareStatement(insertQuery);
 
@@ -29,17 +55,11 @@ public class FplGameweekDbConnector {
 
         } catch (SQLException e) {
             if (e.getErrorCode()== 0) {
-                // e.printStackTrace();
+                e.printStackTrace();
             } else { 
                 e.printStackTrace();
             } 
-        } finally {
-                
-            try {
-                FplDatabaseConnector.closeDatabaseConnection();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }        }
+        } 
 
     }
         
@@ -59,7 +79,6 @@ public class FplGameweekDbConnector {
     private void executeStatement(Statement stmt, PreparedStatement pStmt) throws SQLException {
         try {
             pStmt.executeUpdate();
-            pStmt.close();
         } catch (SQLException e) {
             throw e;
         } finally {
@@ -67,6 +86,8 @@ public class FplGameweekDbConnector {
             pStmt.close();
         }
     }
+
+    
 
 
 

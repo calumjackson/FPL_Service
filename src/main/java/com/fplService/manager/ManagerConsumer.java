@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.errors.WakeupException;
@@ -13,7 +14,6 @@ import org.slf4j.LoggerFactory;
 
 import com.fplService.managerDatabase.FplManagerDBFactory;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 
 public final class ManagerConsumer implements Runnable {
@@ -47,7 +47,7 @@ public final class ManagerConsumer implements Runnable {
 
     public void receiveMessage() {
 
-        Duration timeout = Duration.ofMillis(1000);
+        Duration timeout = Duration.ofMillis(10000);
         try {
 
             while (true) {
@@ -55,7 +55,7 @@ public final class ManagerConsumer implements Runnable {
                 pollManagerConsumer(timeout);
             }
         } catch (WakeupException e) {
-            System.out.println("Woken up");
+            System.out.println("Manager Consumer Woken up");
         } finally {
             managerConsumer.commitAsync();
             managerConsumer.close();
@@ -68,23 +68,17 @@ public final class ManagerConsumer implements Runnable {
 
         Logger logger = LoggerFactory.getLogger(ManagerConsumer.class);
 
-        logger.info("Logging messages");
-
+        logger.debug("Logging messages");
+ 
         ConsumerRecords<String, String> records = managerConsumer.poll(timeout);
 
         logger.info("Number of records " + records.count());
 
-        for (ConsumerRecord<String, String> record : records) {
-            logger.debug("topic = %s, partition = %d, offset = %d, " +
-                    "customer = %s, country = %s\n",
-                    record.topic(), record.partition(), record.offset(),
-                    record.key(), record.value());
-
-            new FplManagerDBFactory().storeManagerFromJSON(record.value());
-        }
+        new FplManagerDBFactory().storeManagersJSON(records);
+        
     }
 
-    public void closeProducer() {
+    public void closeConsumer() {
         managerConsumer.close();
     }
 
@@ -95,7 +89,7 @@ public final class ManagerConsumer implements Runnable {
 
     public void shutdown() throws InterruptedException {
         managerConsumer.wakeup();
-        latch.await();
-    }
+        latch.await(3,  TimeUnit.SECONDS);
+        }
 
 }

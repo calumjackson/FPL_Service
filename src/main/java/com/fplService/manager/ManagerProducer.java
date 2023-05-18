@@ -10,7 +10,7 @@ import org.apache.kafka.common.serialization.StringSerializer;
 public class ManagerProducer {
 
     public static final String MANAGER_TOPIC = "fpl_managers";
-    private KafkaProducer<String, String> managerProducer;
+    private static KafkaProducer<String, String> managerProducer;
 
     public ManagerProducer() {
         createTeamProducer();
@@ -27,16 +27,16 @@ public class ManagerProducer {
     
             KafkaProducer<String, String> producer = new KafkaProducer<>(producerProps);
     
-            this.managerProducer = producer;
+            managerProducer = producer;
     }
 
-    public void sendMessage(ProducerRecord<String, String> producerRecord) {
+    public static void sendMessage(ProducerRecord<String, String> producerRecord) {
 
         managerProducer.send(producerRecord);        
 
     }  
     
-    public void closeProducer() {
+    public static void closeProducer() {
         managerProducer.flush();
         managerProducer.close();
     }

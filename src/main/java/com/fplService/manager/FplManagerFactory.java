@@ -14,11 +14,9 @@ public class FplManagerFactory {
 
         try {
             
-            ManagerProducer managerProducer = new ManagerProducer();
-
             ProducerRecord<String, String> managerRecord = new ProducerRecord<String, String>(ManagerProducer.MANAGER_TOPIC, fplManager.toString());
-            managerProducer.sendMessage(managerRecord);
-            managerProducer.closeProducer();
+            ManagerProducer.sendMessage(managerRecord);
+
         } catch (Exception e) {
             e.printStackTrace();
         }

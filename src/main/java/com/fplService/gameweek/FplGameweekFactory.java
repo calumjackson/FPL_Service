@@ -1,16 +1,12 @@
 package com.fplService.gameweek;
 
 import java.util.List;
-
 import org.apache.kafka.clients.producer.ProducerRecord;
-
 import com.fplService.httpService.HttpConnector;
 
 public class FplGameweekFactory {
 
     public void createManagerGameweek(Integer managerId) {
-
-        GameweekProducer gameweekProducer = new GameweekProducer();
         
         List<FplGameweek> fplGameweeks = requestGameweekDetails(managerId);
             for (FplGameweek gameweek : fplGameweeks) {
@@ -18,12 +14,8 @@ public class FplGameweekFactory {
                 ProducerRecord<String, String> gameweekRecord 
                     = new ProducerRecord<String,String>(GameweekProducer.GAMEWEEK_TOPIC, gameweek.toString());
 
-                gameweekProducer.sendMessage(gameweekRecord);
-                
-        }
-
-        gameweekProducer.closeProducer();
-            
+                GameweekProducer.sendMessage(gameweekRecord);       
+        }            
     }
 
     private List<FplGameweek> requestGameweekDetails(Integer managerId) {

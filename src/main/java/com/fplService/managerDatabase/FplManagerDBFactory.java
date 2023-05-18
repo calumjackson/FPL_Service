@@ -2,6 +2,11 @@ package com.fplService.managerDatabase;
 
 import java.sql.*;
 
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fplService.databaseConnection.FplDatabaseConnector;
 import com.fplService.manager.FplManager;
 import com.google.gson.Gson;
@@ -10,32 +15,43 @@ public class FplManagerDBFactory {
 
     Connection dbConnection;
     
+    public void storeManagersJSON(ConsumerRecords<String, String> records) {
+
+        Logger logger = LoggerFactory.getLogger(FplManagerDBFactory.class);
+
+        try {
+            dbConnection = FplDatabaseConnector.getFplDbConnection();
+        
+
+            for (ConsumerRecord<String, String> record : records) {
+                logger.debug("topic = %s, partition = %d, offset = %d, " +
+                        "customer = %s, country = %s\n",
+                        record.topic(), record.partition(), record.offset(),
+                        record.key(), record.value());
+
+                storeManagerFromJSON(record.value());
+            }
+
+        } catch (SQLException e) {
+            logger.info(e.getMessage());
+        } 
+
+    }
+
 
     public void storeManager(FplManager manager) {
         try {
-
-            dbConnection = FplDatabaseConnector.getFplDbConnection();
             
-            String insertQuery = "INSERT INTO fpl_managers(manager_id, first_name, second_name, team_name) VALUES (?, ?, ?, ?)";
-            
+            String insertQuery = "INSERT INTO fpl_managers(manager_id, first_name, second_name, team_name) VALUES (?, ?, ?, ?)";            
             Statement stmt = dbConnection.createStatement();
             PreparedStatement pStmt = dbConnection.prepareStatement(insertQuery);
             
             buildInsertManagerStatement(manager, pStmt);
             executeStatement(stmt, pStmt);
             
-            FplDatabaseConnector.closeDatabaseConnection();
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally { 
-            try {
-                dbConnection.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-        }
-        
+        } 
     }
 
     public void storeManagerFromJSON(String managerJSON) {
@@ -93,7 +109,6 @@ public class FplManagerDBFactory {
             e.printStackTrace();
         } finally {
             gameweekResultSet.close();
-            dbConnection.close();
             closeStatements(stmt, pStmt);
         }
 
@@ -135,10 +150,14 @@ public class FplManagerDBFactory {
         try {
             pStmt.executeUpdate();
             pStmt.close();
-        } catch (Exception e) {
+        } catch (SQLException e) {
             stmt.close();
             pStmt.close();
-            e.printStackTrace();
+            if (e.getErrorCode()== 0) {
+                // e.printStackTrace();
+            } else { 
+                e.printStackTrace();
+            } 
         } finally {
             stmt.close();
             pStmt.close();
@@ -177,5 +196,7 @@ public class FplManagerDBFactory {
             e.printStackTrace();
         }
     }
+
+    
 
 }
