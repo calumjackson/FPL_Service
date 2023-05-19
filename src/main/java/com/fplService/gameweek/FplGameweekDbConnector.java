@@ -21,7 +21,7 @@ public class FplGameweekDbConnector {
 
         try {
             dbConnection = DatasourcePool.getDatabaseConnection();
-            logger.info("Is gameweek database closed: " + dbConnection.isClosed());
+            logger.debug("Is gameweek database closed: " + dbConnection.isClosed());
             
             for (ConsumerRecord<String, String> record : records) {
                 logger.debug("topic = %s, partition = %d, offset = %d, " +
@@ -31,10 +31,11 @@ public class FplGameweekDbConnector {
                 
                 storeGameweekFromJSON(record.value());
             }
-            
         } catch (SQLException e) {
             logger.info("Cannot connect to database");
             throw e;
+        } finally {
+            dbConnection.close();
         }
     }
 

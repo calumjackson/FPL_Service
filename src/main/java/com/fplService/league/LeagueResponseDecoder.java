@@ -2,20 +2,60 @@ package com.fplService.league;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import com.google.gson.Gson;
 
 public class LeagueResponseDecoder {
+
+    List<Integer> managerIds = new ArrayList<Integer>();
+    Boolean hasNext;
+
+    public Boolean getHasNext() {
+        return hasNext;
+    }
+
+    public void setHasNext(Boolean hasNext) {
+        this.hasNext = hasNext;
+    }
+
+    public List<Integer> getManagerIds() {
+        return managerIds;
+    }
+
+    public void setManagerIds(List<Integer> managerIds) {
+        this.managerIds = managerIds;
+    }
 
     public List<Integer> decodeResponse(String responseBody) {
 
         LeagueDataShell data = null;
         data = new Gson().fromJson((responseBody), LeagueDataShell.class);
 
-        List<Integer> managerIds = data.getStandings().getManagerIds();
+        System.out.println("Has next :" + data.getStandings().getHas_next());
+        addManagerIDs(data.getStandings().getManagerIds());
+        hasNext = data.getStandings().getHasNext();
         return managerIds;
 
-    }    
+    }   
+
+    public void addManagerIDs(List<Integer> responseManagerIds) {
+        for (Integer managerId : responseManagerIds) {
+            this.managerIds.add(managerId);
+        }
+        
+    }
+    
+    public boolean decodeResponses(String responseBody) {
+
+        LeagueDataShell data = null;
+        data = new Gson().fromJson((responseBody), LeagueDataShell.class);
+
+        // System.out.println("Has next :" + data.getStandings().getHas_next());
+        addManagerIDs(data.getStandings().getManagerIds());
+        hasNext = data.getStandings().getHasNext();
+        return getHasNext();
+    }
 
 
     class LeagueDataShell {
@@ -50,6 +90,15 @@ public class LeagueResponseDecoder {
         
         String page;
         TeamList[] results;
+        String has_next;
+
+        public String getHas_next() {
+            return has_next;
+        }
+
+        public void setHas_next(String has_next) {
+            this.has_next = has_next;
+        }
 
         public String getPage() {
             return page;
@@ -76,6 +125,15 @@ public class LeagueResponseDecoder {
             }
             
             return managerIds;
+        }
+
+        public Boolean getHasNext() {
+            
+            if (has_next.equals("true")) {
+                return true;
+            } 
+
+            return false;
         }
         
 

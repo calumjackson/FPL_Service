@@ -55,7 +55,7 @@ public class Main {
              }
 
             // Wait a little bit for the messages to be processed on the separate threads.
-            latch.await(10, TimeUnit.SECONDS);
+            latch.await(15, TimeUnit.SECONDS);
         } catch (Exception e){
             e.printStackTrace();
         } finally {
@@ -71,11 +71,7 @@ public class Main {
     }
 
     private static void closeDatabase() {
-        try {
-            FplDatabaseConnector.closeDatabaseConnection();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        DatasourcePool.closeConnectionPool();
     }
 
     private static void populateGameweekTotals(Integer managerId) {

@@ -14,7 +14,6 @@ import com.fplService.databaseUtils.DatasourcePool;
 
 public class DatabaseUtilHelper {
     
-    Connection dbConnection;
     Logger logger;
 
     public static String fplManagersTable = "fpl_managers";
@@ -23,11 +22,10 @@ public class DatabaseUtilHelper {
     public DatabaseUtilHelper() {
 
         logger = LoggerFactory.getLogger(DatabaseUtilHelper.class);
-        try {
-            dbConnection = DatasourcePool.getDatabaseConnection();
-            } catch (Exception e) {
-                logger.info(e.getStackTrace().toString());
-        }
+    }
+
+    public void startConnections() {
+        DatasourcePool.initiateDatabasePool();
     }
 
     public void closeConnection() {
@@ -36,7 +34,7 @@ public class DatabaseUtilHelper {
 
     public void deleteAllRecordsFromTable(String tableName) throws SQLException {
 
-        dbConnection = DatasourcePool.getDatabaseConnection();
+        Connection dbConnection = DatasourcePool.getDatabaseConnection();
 
         String deleteQuery = "DELETE FROM " + tableName;
         Statement stmt = dbConnection.createStatement();
@@ -51,7 +49,7 @@ public class DatabaseUtilHelper {
 
         Boolean managerExists = false;
         String tableName = "fpl_managers";
-
+        Connection dbConnection = null;
         try {
             dbConnection = DatasourcePool.getDatabaseConnection();    
             
@@ -78,6 +76,7 @@ public class DatabaseUtilHelper {
     public boolean doesGameweekRecordExist(String managerId) {
 
         Boolean gameweekExists = false;
+        Connection dbConnection = null;
 
         try {
             dbConnection = DatasourcePool.getDatabaseConnection(); 
@@ -107,9 +106,7 @@ public class DatabaseUtilHelper {
     public Integer getRecordCount(String tableName, String managerId) { 
         Statement stmt = null;
         PreparedStatement pStmt = null;
-        
-        
-        
+        Connection dbConnection = null;        
         String query = "select count(*) recordCount from " + tableName + " where manager_id = ?";
         Integer recordCount = -1;
         ResultSet gameweekCountQuery = null;
@@ -126,7 +123,11 @@ public class DatabaseUtilHelper {
                 e.printStackTrace();
         } finally {
             closeStatements(stmt, pStmt);
-            closeConnection();
+            try {
+                dbConnection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
         return recordCount;
     }
@@ -136,23 +137,30 @@ public class DatabaseUtilHelper {
         ResultSet gameweekCountQuery = null;
         Statement stmt = null;
         PreparedStatement pStmt = null;
+        Connection dbConnection = null;
+
         String query = "select count(*) recordCount from " + tableName;
 
         
         try {
             dbConnection = DatasourcePool.getDatabaseConnection();    
             stmt = dbConnection.createStatement();
-             pStmt = dbConnection.prepareStatement(query);
+            pStmt = dbConnection.prepareStatement(query);
             gameweekCountQuery = executeQueryStatement(stmt, pStmt);
             gameweekCountQuery.next();
             recordCount = gameweekCountQuery.getInt("recordCount");
 
-            logger.info("Record Count: " + recordCount); 
+            logger.info("Record Count for " + tableName + ": " + recordCount); 
         } catch (Exception e) {
                 e.printStackTrace();
                 
         } finally {
-            closeStatements(stmt, pStmt);
+            try {
+                closeStatements(stmt, pStmt);
+                dbConnection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
         return recordCount;
     }

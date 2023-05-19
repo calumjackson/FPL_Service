@@ -11,33 +11,38 @@ import com.fplService.databaseUtils.DatasourcePool;
 import com.google.gson.Gson;
 
 public class FplManagerDBFactory {
-
-    Connection dbConnection;
+    Connection dbConnection = null;
     
     public void storeManagersJSON(ConsumerRecords<String, String> records) {
 
         Logger logger = LoggerFactory.getLogger(FplManagerDBFactory.class);
-
         try {
             dbConnection = DatasourcePool.getDatabaseConnection();
 
             for (ConsumerRecord<String, String> record : records) {
-                logger.debug("topic = %s, partition = %d, offset = %d, " +
+                logger.debug(String.format("info = %s, partition = %d, offset = %d, " +
                         "customer = %s, country = %s\n",
                         record.topic(), record.partition(), record.offset(),
-                        record.key(), record.value());
+                        record.key(), record.value()));
 
                 storeManagerFromJSON(record.value());
             }
 
         } catch (SQLException e) {
             logger.info(e.getMessage());
+        } finally {
+            try {
+                dbConnection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         } 
 
     }
 
 
     public void storeManager(FplManager manager) {
+
         try {
             
             String insertQuery = "INSERT INTO fpl_managers(manager_id, first_name, second_name, team_name) VALUES (?, ?, ?, ?)";            

@@ -57,7 +57,6 @@ public class HttpConnector {
 
         String fplUrl = "https://fantasy.premierleague.com/api/entry/"+userId+"/";
 
-        
         Request request = getRequest(fplUrl);
 
         Response response = null;
@@ -76,20 +75,38 @@ public class HttpConnector {
 
         Map<String, String> headers = new HashMap<>();
         headers.put("Connection", "keep-alive");
-
-        String fplUrl = "https://fantasy.premierleague.com/api/leagues-classic/"+leagueId+"/standings/";
-
-        Request request = getRequest(fplUrl);
-
         Response response = null;
-        try {
-            response = client.newCall(request).execute();
-            String managerJsonString = response.body().string();
-            return new FplLeague(leagueId, new LeagueResponseDecoder().decodeResponse(managerJsonString));
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        Integer pageStanding = 2945;
+        Boolean hasNext=true;
+        
+        
+        LeagueResponseDecoder leagueResponseDecoder = new LeagueResponseDecoder();
+        
+        while (hasNext) {
+            Request request = getRequest(generateFplLeagueRequestUrl(leagueId, pageStanding));
+            // System.out.println("Has next : " + hasNext + " & page Standing " + pageStanding);
+            try {
+                response = client.newCall(request).execute();
+                String managerJsonString = response.body().string(); 
+                hasNext = leagueResponseDecoder.decodeResponses(managerJsonString);
+                response.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            pageStanding++;
+            if (pageStanding%50 == 0) {
+                System.out.println("On page : " + pageStanding);
+            }
         }
+        
+        FplLeague fplLeague = new FplLeague(leagueId, leagueResponseDecoder.getManagerIds());
+        return fplLeague;
+    }
+        
+    public String generateFplLeagueRequestUrl(Integer leagueId, Integer pageStanding) {
+        
+        String fplUrl = "https://fantasy.premierleague.com/api/leagues-classic/"+leagueId+"/standings/?page_standings="+pageStanding;
+        return fplUrl;
     }
 
 

@@ -4,6 +4,13 @@
             "type": "java",
             "name": "Main",
             "request": "launch",
+            "mainClass": "com.fplService.Main",
+            "projectName": "FPL_Service"
+        },
+        {
+            "type": "java",
+            "name": "Main",
+            "request": "launch",
             "mainClass": "Main",
             "projectName": "FPL_Service"
         },

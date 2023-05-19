@@ -34,5 +34,11 @@ public class FplLeague {
         this.managerIds = managerIds;
     }
 
+    public void addManagerIds(List<Integer> managerIds) {
+        for (Integer managerId : managerIds) {
+            this.managerIds.add(managerId);
+        }
+    }
+
 
 }

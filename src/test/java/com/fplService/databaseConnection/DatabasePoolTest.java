@@ -57,6 +57,13 @@ public class DatabasePoolTest {
     }
 
     @Test
+    public void testNullConnectivity() throws SQLException {
+        connection = DatasourcePool.getDatabaseConnection();
+        assertNotNull(connection);
+
+    }
+
+    @Test
     public void testAvailability() throws SQLException {
 
         DatasourcePool.initiateDatabasePool();
@@ -73,6 +80,8 @@ public class DatabasePoolTest {
         connection.close();
         logger.info("Active connections: " + DatasourcePool.getActiveConnections());
         connectionThree.close();
+        logger.info("Active connections: " + DatasourcePool.getActiveConnections());
+        connection = DatasourcePool.getDatabaseConnection();
         logger.info("Active connections: " + DatasourcePool.getActiveConnections());
 
         

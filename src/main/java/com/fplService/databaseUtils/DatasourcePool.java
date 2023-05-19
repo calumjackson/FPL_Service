@@ -31,7 +31,7 @@ public class DatasourcePool {
     public static Connection getDatabaseConnection() throws SQLException {
         logger = LoggerFactory.getLogger(DatasourcePool.class);
         try {
-            if (!Objects.isNull(dataSource)) {
+            if (Objects.isNull(dataSource)) {
                 initiateDatabasePool();
                 return dataSource.getConnection();
             }
@@ -44,7 +44,9 @@ public class DatasourcePool {
             logger.info(e.getMessage());
             throw e;
         }
-        return dataSource.getConnection();
+        // logger.info("Connections open: " + getActiveConnections());
+        Connection connection = dataSource.getConnection();
+        return connection;
     }
 
     public static void closeConnectionPool() {

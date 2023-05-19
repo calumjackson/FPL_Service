@@ -19,10 +19,13 @@ public final class ManagerConsumer implements Runnable {
     public static final String MANAGER_TOPIC = "fpl_managers";
     private KafkaConsumer<String, String> managerConsumer;
     private CountDownLatch latch;
+    Logger logger;
+    private static Integer TIMEOUT_LENGTH = 5000;
 
     public ManagerConsumer(CountDownLatch latch) {
         createTeamConsumer();
         this.latch = latch;
+        logger = LoggerFactory.getLogger(ManagerConsumer.class);
     }
 
     public void createTeamConsumer() {
@@ -45,12 +48,13 @@ public final class ManagerConsumer implements Runnable {
 
     public void receiveMessage() {
 
-        Duration timeout = Duration.ofMillis(10000);
+        Duration timeout = Duration.ofMillis(TIMEOUT_LENGTH);
         try {
 
             while (true) {
 
                 pollManagerConsumer(timeout);
+                
             }
         } catch (WakeupException e) {
             System.out.println("Manager Consumer Woken up");
@@ -69,7 +73,7 @@ public final class ManagerConsumer implements Runnable {
         logger.debug("Logging messages");
  
         ConsumerRecords<String, String> records = managerConsumer.poll(timeout);
-
+        
         logger.info("Number of records " + records.count());
 
         new FplManagerDBFactory().storeManagersJSON(records);
@@ -88,6 +92,6 @@ public final class ManagerConsumer implements Runnable {
     public void shutdown() throws InterruptedException {
         managerConsumer.wakeup();
         latch.await(3,  TimeUnit.SECONDS);
-        }
+    }
 
 }

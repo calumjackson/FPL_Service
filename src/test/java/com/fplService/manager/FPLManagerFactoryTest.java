@@ -24,6 +24,7 @@ public class FPLManagerFactoryTest {
 
         logger = LoggerFactory.getLogger(FPLManagerFactoryTest.class);
         this.databaseHelper = new DatabaseUtilHelper();
+        databaseHelper.startConnections();
         new ManagerProducer();
 
         try {
@@ -106,7 +107,7 @@ public class FPLManagerFactoryTest {
         ManagerConsumer managerConsumer = new ManagerConsumer(latch);
         new Thread(managerConsumer).start();
 
-        Integer scale = 20000;
+        Integer scale = 15000;
 
         assertFalse(databaseHelper.doesManagerRecordExist(testManagerId));
 
@@ -115,8 +116,6 @@ public class FPLManagerFactoryTest {
             publishMessage(getManagerJSON("100"+String.valueOf(x)));
         }
         ManagerProducer.closeProducer();
-
-
         Runtime.getRuntime().addShutdownHook(new Thread(new ManagerConsumerCloser(managerConsumer)));
         latch.await(20, TimeUnit.SECONDS);
 

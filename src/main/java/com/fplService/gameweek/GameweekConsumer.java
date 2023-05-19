@@ -20,6 +20,8 @@ public final class GameweekConsumer implements Runnable {
     public static final String GAMEWEEK_TOPIC = "fpl_gameweeks";
     private KafkaConsumer<String, String> gamweekConsumer;
     private CountDownLatch latch;
+    private static Integer TIMEOUT_LENGTH = 5000;
+
 
     public GameweekConsumer(CountDownLatch latch) {
         
@@ -47,7 +49,7 @@ public final class GameweekConsumer implements Runnable {
 
     public void receiveMessage() {
 
-        Duration timeout = Duration.ofMillis(10000);
+        Duration timeout = Duration.ofMillis(TIMEOUT_LENGTH);
 
         try {
 
@@ -71,7 +73,7 @@ public final class GameweekConsumer implements Runnable {
 
         logger.debug("Starting to log");
         ConsumerRecords<String, String> records = gamweekConsumer.poll(timeout);
-
+        
         logger.info("Number of gameweeks in poll :" + records.count());
         
         try {
