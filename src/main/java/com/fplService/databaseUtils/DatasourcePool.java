@@ -2,6 +2,7 @@ package com.fplService.databaseUtils;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,11 +31,15 @@ public class DatasourcePool {
     public static Connection getDatabaseConnection() throws SQLException {
         logger = LoggerFactory.getLogger(DatasourcePool.class);
         try {
-            
-            if (dataSource.isClosed()) {
+            if (!Objects.isNull(dataSource)) {
                 initiateDatabasePool();
                 return dataSource.getConnection();
             }
+
+            if (dataSource.isClosed()) {
+                    initiateDatabasePool();
+                    return dataSource.getConnection();
+                }
         } catch (SQLException e) {
             logger.info(e.getMessage());
             throw e;

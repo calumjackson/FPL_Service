@@ -22,7 +22,6 @@ public class FplGameweekDbConnector {
         try {
             dbConnection = DatasourcePool.getDatabaseConnection();
             logger.info("Is gameweek database closed: " + dbConnection.isClosed());
-            // dbConnection = FplDatabaseConnector.getFplDbConnection();
             
             for (ConsumerRecord<String, String> record : records) {
                 logger.debug("topic = %s, partition = %d, offset = %d, " +

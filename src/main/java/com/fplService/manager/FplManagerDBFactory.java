@@ -1,4 +1,4 @@
-package com.fplService.databaseUtils;
+package com.fplService.manager;
 
 import java.sql.*;
 
@@ -7,7 +7,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fplService.manager.FplManager;
+import com.fplService.databaseUtils.DatasourcePool;
 import com.google.gson.Gson;
 
 public class FplManagerDBFactory {
@@ -19,8 +19,7 @@ public class FplManagerDBFactory {
         Logger logger = LoggerFactory.getLogger(FplManagerDBFactory.class);
 
         try {
-            dbConnection = FplDatabaseConnector.getFplDbConnection();
-        
+            dbConnection = DatasourcePool.getDatabaseConnection();
 
             for (ConsumerRecord<String, String> record : records) {
                 logger.debug("topic = %s, partition = %d, offset = %d, " +
@@ -65,7 +64,7 @@ public class FplManagerDBFactory {
         ResultSet managerCountQuery = null;
 
         try {
-            dbConnection = FplDatabaseConnector.getFplDbConnection();    
+            dbConnection = DatasourcePool.getDatabaseConnection();    
             
             String selectQuery = "Select count(*) managerCount FROM fpl_managers";
             stmt = dbConnection.createStatement();
@@ -79,8 +78,8 @@ public class FplManagerDBFactory {
             e.printStackTrace();
         } finally {
             managerCountQuery.close();
-            dbConnection.close();
             closeStatements(stmt, pStmt);
+            dbConnection.close();
         }
 
         return managerCount;
@@ -94,7 +93,7 @@ public class FplManagerDBFactory {
         ResultSet gameweekResultSet = null;
 
         try {
-            dbConnection = FplDatabaseConnector.getFplDbConnection();    
+            dbConnection = DatasourcePool.getDatabaseConnection();    
             
             String selectQuery = "Select count(*) gameweekCount FROM fpl_gameweeks";
             stmt = dbConnection.createStatement();
@@ -109,6 +108,7 @@ public class FplManagerDBFactory {
         } finally {
             gameweekResultSet.close();
             closeStatements(stmt, pStmt);
+            dbConnection.close();
         }
 
         return gameweekCount;
@@ -116,23 +116,24 @@ public class FplManagerDBFactory {
 
     public void deleteAllManagers() throws SQLException {
 
-        dbConnection = FplDatabaseConnector.getFplDbConnection();
-
+        dbConnection = DatasourcePool.getDatabaseConnection();
         String deleteQuery = "DELETE FROM fpl_managers";
         Statement stmt = dbConnection.createStatement();
         PreparedStatement pStmt = dbConnection.prepareStatement(deleteQuery);
         executeStatement(stmt, pStmt);
+        dbConnection.close();
          
     }
 
     public void deleteAllGameweeks() throws SQLException {
 
-        dbConnection = FplDatabaseConnector.getFplDbConnection();
+        dbConnection = DatasourcePool.getDatabaseConnection();
 
         String deleteQuery = "DELETE FROM fpl_gameweeks";
         Statement stmt = dbConnection.createStatement();
         PreparedStatement pStmt = dbConnection.prepareStatement(deleteQuery);
         executeStatement(stmt, pStmt);
+        dbConnection.close();
          
     }
 
@@ -184,11 +185,8 @@ public class FplManagerDBFactory {
 
     }
 
-
-
     private void closeStatements(Statement stmt, PreparedStatement pStmt) {
         try {
-
             stmt.close();
             pStmt.close();
         } catch (SQLException e) { 
