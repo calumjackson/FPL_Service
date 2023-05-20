@@ -27,18 +27,6 @@ public class LeagueResponseDecoder {
         this.managerIds = managerIds;
     }
 
-    public List<Integer> decodeResponse(String responseBody) {
-
-        LeagueDataShell data = null;
-        data = new Gson().fromJson((responseBody), LeagueDataShell.class);
-
-        System.out.println("Has next :" + data.getStandings().getHas_next());
-        addManagerIDs(data.getStandings().getManagerIds());
-        hasNext = data.getStandings().getHasNext();
-        return managerIds;
-
-    }   
-
     public void addManagerIDs(List<Integer> responseManagerIds) {
         for (Integer managerId : responseManagerIds) {
             this.managerIds.add(managerId);

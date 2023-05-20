@@ -12,6 +12,8 @@ import okhttp3.ResponseBody;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -23,6 +25,8 @@ public class HttpConnector {
     ObjectMapper mapper = new ObjectMapper();
 
     OkHttpClient client = new OkHttpClient();
+
+    Logger logger;
 
     public void generateApiRequest(Integer userId) {
 
@@ -47,6 +51,8 @@ public class HttpConnector {
 
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } finally {
+            response.close();
         }
     }
 
@@ -61,42 +67,44 @@ public class HttpConnector {
 
         Response response = null;
         try {
-            response = client.newCall(request).execute();
-
+            response = client.newCall(request).execute();            
             String managerJsonString = response.body().string();
             return new ManagerDetailsResponseDecoder().decodeResponse(managerJsonString);
-
+            
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } finally {
+            response.close();
         }
     }
 
     public FplLeague getLeagueDetailsFromFpl(Integer leagueId) {
-
+        logger = LoggerFactory.getLogger(HttpConnector.class);
+        
         Map<String, String> headers = new HashMap<>();
         headers.put("Connection", "keep-alive");
         Response response = null;
-        Integer pageStanding = 2945;
+        Integer pageStanding = 1;
         Boolean hasNext=true;
-        
         
         LeagueResponseDecoder leagueResponseDecoder = new LeagueResponseDecoder();
         
         while (hasNext) {
             Request request = getRequest(generateFplLeagueRequestUrl(leagueId, pageStanding));
-            // System.out.println("Has next : " + hasNext + " & page Standing " + pageStanding);
+            logger.debug("Has next : " + hasNext + " & page Standing " + pageStanding);
             try {
                 response = client.newCall(request).execute();
-                String managerJsonString = response.body().string(); 
+                String managerJsonString = response.body().string();
+                logger.debug(managerJsonString); 
                 hasNext = leagueResponseDecoder.decodeResponses(managerJsonString);
-                response.close();
+                logger.debug("Managers in List: " +leagueResponseDecoder.getManagerIds().size());
             } catch (IOException e) {
                 throw new RuntimeException(e);
+            } finally {
+                response.close();
             }
             pageStanding++;
-            if (pageStanding%50 == 0) {
-                System.out.println("On page : " + pageStanding);
-            }
+            
         }
         
         FplLeague fplLeague = new FplLeague(leagueId, leagueResponseDecoder.getManagerIds());
@@ -131,11 +139,12 @@ public class HttpConnector {
                 gameweek.setManagerId(managerId);
                 
             }
-
             return gameweeks;
-
+            
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } finally {
+            response.close();
         }
     }    
 
