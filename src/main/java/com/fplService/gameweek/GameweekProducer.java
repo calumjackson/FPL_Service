@@ -29,7 +29,7 @@ public class GameweekProducer {
             producerProps.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, boostrapServers);
             producerProps.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
             producerProps.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-            producerProps.setProperty(ProducerConfig.LINGER_MS_CONFIG, "10000");
+            producerProps.setProperty(ProducerConfig.LINGER_MS_CONFIG, "50");
 
             KafkaProducer<String, String> producer = new KafkaProducer<>(producerProps);
     

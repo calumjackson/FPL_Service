@@ -53,6 +53,7 @@ public class HttpConnector {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
+            response.body().close();
             response.close();
         }
     }

@@ -58,8 +58,15 @@ public class FplManagerDBFactory {
     }
 
     public void storeManagerFromJSON(String managerJSON) {
-        storeManager(new Gson().fromJson((managerJSON), FplManager.class));
+        Logger logger = LoggerFactory.getLogger(FplManagerDBFactory.class);
+        try { 
+            storeManager(new Gson().fromJson((managerJSON), FplManager.class));
+        } catch (Exception e) {
+            logger.info(e.getMessage());
+            logger.info("Error JSON string : " + managerJSON);
+        }
     }
+
 
     public Integer getManagerCount() throws SQLException {
 
