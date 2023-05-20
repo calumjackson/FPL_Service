@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,6 +34,7 @@ public class MainTest {
     public static DatabaseUtilHelper databaseHelper;
     static CountDownLatch latch;
     Logger logger;
+    Integer numberOfGameweeks = 37;
 
     
     @Before
@@ -71,19 +73,32 @@ public class MainTest {
     }
 
     @Test
-    public void testMainFlow() {
+    public void testFlowWithLadsLeague() {
+        Integer leagueId = 57365;
+        testMainFlow(leagueId);
+    }
+
+    @Test
+    public void testFlowWithtwoPageLeague() {
+        Integer leagueId = 57380;
+        testMainFlow(leagueId);
+    }
+
+    @Test
+    public void testFlowWithLargerLeague() {
+        Integer leagueId = 11;
+        testMainFlow(leagueId);
+    }
+
+    public void testMainFlow(Integer leagueId) {
 
         logger.debug("Log message Starting");
         logger.info("Manager Records: " + databaseHelper.getRecordCount(DatabaseUtilHelper.fplManagersTable));
 
         Integer managerCount = 0;
-        Integer gameweekCount=0;
+        Integer gameweekCount = 0;
         
-        try {
-            
-            Integer leagueId = 57365;
-            // Integer leagueId = 11;
-            
+        try {           
             // Get the league details
             FplLeague fplLeague = new FplLeagueFactory().createFplLeage(leagueId);
             List<Integer> managerIds = fplLeague.getManagerIds();
@@ -91,26 +106,16 @@ public class MainTest {
             logger.info("Managers: " + managerCount);
         
             // Create all the managers in the league
-             for (Integer managerId : managerIds) {
+            for (Integer managerId : managerIds) {
                 new FplManagerFactory().createFplManager(managerId);
-             }
+            }
 
             // Get the gameweek totals for each manager.
-            List<Integer> managersToRemove = new ArrayList<>();
             for (Integer managerId : managerIds) {
-                if (!populateGameweekTotals(managerId)) {
-                    managersToRemove.add(managerId);
-                };
+                gameweekCount += populateGameweekTotals(managerId);
             }
-            logger.info("Removing managers " + managersToRemove.size());
-            for (Integer managerId : managersToRemove) {
-                if (managerIds.remove(managerId)) {
-                    logger.debug("Removing manager. New Size " + managerIds.size());
-                } 
-             } 
              
-             gameweekCount = managerIds.size() * 36;
-             logger.info("Expected gameweeks: " + gameweekCount);
+            logger.info("Expected gameweeks: " + gameweekCount);
 
             // Wait a little bit for the messages to be processed on the separate threads
             checkDatabaseUpdates();
@@ -128,22 +133,68 @@ public class MainTest {
     private void checkDatabaseUpdates() throws InterruptedException {
         Integer databaseCount = 0;
         Boolean isUpdating = true;
+        Integer attemptcount = 0;
         while (isUpdating) {
             Integer newCount = databaseHelper.getRecordCount(DatabaseUtilHelper.fplGameweekTable);
             logger.debug("DatabaseCount: " + databaseCount + ", newCount" + newCount);
             if (databaseCount.equals(newCount)) {
-                isUpdating = false;
-                logger.debug("Databases A: " + databaseCount);
+                logger.info("Databases A: " + databaseCount);
+                Thread.sleep(3000);
+                if (attemptcount > 3) {
+                    isUpdating=false;
+                }
+                attemptcount++;
 
             } else {
                 databaseCount = newCount;
                 Thread.sleep(3000);
-                logger.debug("Databases B: " + databaseCount);
+                logger.info("Databases B: " + databaseCount);
+                attemptcount = 1;
             };
         }
-        logger.debug("Databases C: " + databaseCount);
+        logger.info("Databases C: " + databaseCount);
     }
 
+    @Test 
+    public void testDatabaseCheck() {
+        Integer gameweeksToGenerate = 1000;
+        generateGameweeks(gameweeksToGenerate);
+        try {
+            checkDatabaseUpdates();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        assertEquals(gameweeksToGenerate, databaseHelper.getRecordCount(DatabaseUtilHelper.fplGameweekTable));
+    }
+    
+    @Test 
+    public void testDatabaseCheck5k() {
+        Integer gameweeksToGenerate = 5000;
+        generateGameweeks(gameweeksToGenerate);
+        try {
+            checkDatabaseUpdates();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        assertEquals(gameweeksToGenerate, databaseHelper.getRecordCount(DatabaseUtilHelper.fplGameweekTable));
+    }
+
+    private void generateGameweeks(Integer gameweeksToGenerate) {
+
+        String testGameweekJSONStart = "{\"managerId\": \"";
+        String testManagerEnd =  "\", \"gameweekId\": \"1\", " +
+            "\"seasonId\": \"2022-23\", " + 
+            "\"gameweekPoints\": \"75\", " +
+            "\"gameweekBenchPoints\": \"0\", " +
+            "\"transferPointCosts\": \"6\"}";
+        for (int x = 1; x <= gameweeksToGenerate; x++) {
+            String testMessage = testGameweekJSONStart + x + testManagerEnd;
+            logger.info(testMessage);
+            ProducerRecord<String, String> testManagerRecord = new ProducerRecord<String, String>(databaseHelper.fplGameweekTable, testMessage);
+            GameweekProducer.sendMessage(testManagerRecord);
+        }
+
+}
 
     private static void closeProducers() {
         GameweekProducer.closeProducer();
@@ -154,7 +205,7 @@ public class MainTest {
         DatasourcePool.closeConnectionPool();
     }
 
-    private static boolean populateGameweekTotals(Integer managerId) {
+    private static Integer populateGameweekTotals(Integer managerId) {
         return new FplGameweekFactory().createManagerGameweek(managerId);
     }
 

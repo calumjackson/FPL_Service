@@ -25,8 +25,9 @@ public class HttpConnector {
     ObjectMapper mapper = new ObjectMapper();
 
     OkHttpClient client = new OkHttpClient();
-
     Logger logger;
+
+    Integer maxLeagueSize = 5000;
 
     public void generateApiRequest(Integer userId) {
 
@@ -105,6 +106,10 @@ public class HttpConnector {
             }
             pageStanding++;
             
+            if (maxLeagueSize / 50 < pageStanding) {
+                hasNext = false;
+            }
+            
         }
         
         FplLeague fplLeague = new FplLeague(leagueId, leagueResponseDecoder.getManagerIds());
@@ -162,7 +167,5 @@ public class HttpConnector {
 
         return request;
     }
-
-    
 
 }

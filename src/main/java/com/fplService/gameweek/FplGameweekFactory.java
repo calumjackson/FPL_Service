@@ -9,15 +9,11 @@ import com.fplService.httpService.HttpConnector;
 
 public class FplGameweekFactory {
 
-    private Integer gameweekNumber = 36;
+    private Integer gameweekNumber = 37;
 
-    public boolean createManagerGameweek(Integer managerId) {
-        Logger logger = LoggerFactory.getLogger(FplGameweekFactory.class);
+    public Integer createManagerGameweek(Integer managerId) {
         List<FplGameweek> fplGameweeks = requestGameweekDetails(managerId);
-        if (fplGameweeks.size() < 36) {
-            // logger.debug("Manager only has " + fplGameweeks.size() + " gameweeks - excluded");
-            return false;
-        }
+        
         for (FplGameweek gameweek : fplGameweeks) {
             
             ProducerRecord<String, String> gameweekRecord 
@@ -25,7 +21,7 @@ public class FplGameweekFactory {
 
             GameweekProducer.sendMessage(gameweekRecord);
         }            
-        return true;
+        return fplGameweeks.size();
     }
 
     private List<FplGameweek> requestGameweekDetails(Integer managerId) {
