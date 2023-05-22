@@ -153,6 +153,32 @@ public class HttpConnector {
         }
     }    
 
+    public Response generateBasicApiRequest(String fplUrl) {
+
+        logger = LoggerFactory.getLogger(HttpConnector.class);
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Connection", "keep-alive");
+        
+        Request request = getRequest(fplUrl);
+
+        Response response = null;
+        try {
+            response = client.newCall(request).execute();
+
+            ResponseBody responseBody = response.body();
+            String managerJsonString = responseBody.string();
+
+            logger.debug(managerJsonString);
+            return response;
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            response.body().close();
+            response.close();
+        }
+    }
+
     @NotNull
     private static Request getRequest(String fplUrl) {
 
