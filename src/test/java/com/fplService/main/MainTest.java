@@ -3,7 +3,6 @@ package com.fplService.main;
 import static org.junit.Assert.assertEquals;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -118,7 +117,9 @@ public class MainTest {
             logger.info("Expected gameweeks: " + gameweekCount);
 
             // Wait a little bit for the messages to be processed on the separate threads
-            checkDatabaseUpdates();
+            checkDatabaseUpdates(DatabaseUtilHelper.fplManagersTable);
+            checkDatabaseUpdates(DatabaseUtilHelper.fplGameweekTable);
+
             
             latch.await(5, TimeUnit.SECONDS);
         } catch (Exception e){
@@ -130,12 +131,12 @@ public class MainTest {
 
     }
 
-    private void checkDatabaseUpdates() throws InterruptedException {
+    private void checkDatabaseUpdates(String tableName) throws InterruptedException {
         Integer databaseCount = 0;
         Boolean isUpdating = true;
         Integer attemptcount = 0;
         while (isUpdating) {
-            Integer newCount = databaseHelper.getRecordCount(DatabaseUtilHelper.fplGameweekTable);
+            Integer newCount = databaseHelper.getRecordCount(tableName);
             logger.debug("DatabaseCount: " + databaseCount + ", newCount" + newCount);
             if (databaseCount.equals(newCount)) {
                 logger.info("Databases A: " + databaseCount);
@@ -160,7 +161,7 @@ public class MainTest {
         Integer gameweeksToGenerate = 1000;
         generateGameweeks(gameweeksToGenerate);
         try {
-            checkDatabaseUpdates();
+            checkDatabaseUpdates(DatabaseUtilHelper.fplGameweekTable);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -172,7 +173,7 @@ public class MainTest {
         Integer gameweeksToGenerate = 5000;
         generateGameweeks(gameweeksToGenerate);
         try {
-            checkDatabaseUpdates();
+            checkDatabaseUpdates(DatabaseUtilHelper.fplGameweekTable);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -190,7 +191,7 @@ public class MainTest {
         for (int x = 1; x <= gameweeksToGenerate; x++) {
             String testMessage = testGameweekJSONStart + x + testManagerEnd;
             logger.info(testMessage);
-            ProducerRecord<String, String> testManagerRecord = new ProducerRecord<String, String>(databaseHelper.fplGameweekTable, testMessage);
+            ProducerRecord<String, String> testManagerRecord = new ProducerRecord<String, String>(DatabaseUtilHelper.fplGameweekTable, testMessage);
             GameweekProducer.sendMessage(testManagerRecord);
         }
 

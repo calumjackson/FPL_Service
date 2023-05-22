@@ -1,88 +1,60 @@
 package com.fplService.manager;
 
 import java.sql.*;
+import java.util.Arrays;
+import java.util.List;
 
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fplService.databaseUtils.DatasourcePool;
-import com.google.gson.Gson;
 
 public class FplManagerDBFactory {
+
     Connection dbConnection = null;
-    
-    public void storeManagersJSON(ConsumerRecords<String, String> records) {
+
+    public void batchStoreManager(List<FplManager> managers) {
 
         Logger logger = LoggerFactory.getLogger(FplManagerDBFactory.class);
         try {
             dbConnection = DatasourcePool.getDatabaseConnection();
+            
+            String insertQuery = "INSERT INTO fpl_managers(manager_id, first_name, second_name, team_name) VALUES (?, ?, ?, ?)";            
+            PreparedStatement pStmt = dbConnection.prepareStatement(insertQuery);
+            logger.debug("Batch size: " + managers.size());
 
-            for (ConsumerRecord<String, String> record : records) {
-                logger.debug(String.format("info = %s, partition = %d, offset = %d, " +
-                        "customer = %s, country = %s\n",
-                        record.topic(), record.partition(), record.offset(),
-                        record.key(), record.value()));
-
-                storeManagerFromJSON(record.value());
+            for (FplManager manager : managers) {
+                buildInsertManagerStatement(manager, pStmt);
+                pStmt.addBatch();
             }
-
+            int[] updateCounts = pStmt.executeBatch();
+            logger.debug(Arrays.toString(updateCounts));
+            
         } catch (SQLException e) {
             logger.info(e.getMessage());
         } finally {
             try {
                 dbConnection.close();
-            } catch (SQLException e) {
+
+            } catch (Exception e) {
                 e.printStackTrace();
             }
-        } 
-
-    }
-
-
-    public void storeManager(FplManager manager) {
-
-        try {
-            
-            String insertQuery = "INSERT INTO fpl_managers(manager_id, first_name, second_name, team_name) VALUES (?, ?, ?, ?)";            
-            Statement stmt = dbConnection.createStatement();
-            PreparedStatement pStmt = dbConnection.prepareStatement(insertQuery);
-            
-            buildInsertManagerStatement(manager, pStmt);
-            executeStatement(stmt, pStmt);
-            
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } 
-    }
-
-    public void storeManagerFromJSON(String managerJSON) {
-        Logger logger = LoggerFactory.getLogger(FplManagerDBFactory.class);
-        try { 
-            storeManager(new Gson().fromJson((managerJSON), FplManager.class));
-        } catch (Exception e) {
-            logger.info(e.getMessage());
-            logger.info("Error JSON string : " + managerJSON);
         }
     }
-
 
     public Integer getManagerCount() throws SQLException {
 
         Integer managerCount = -1;
-        Statement stmt = null;
         PreparedStatement pStmt = null;
         ResultSet managerCountQuery = null;
-
+        
         try {
             dbConnection = DatasourcePool.getDatabaseConnection();    
             
             String selectQuery = "Select count(*) managerCount FROM fpl_managers";
-            stmt = dbConnection.createStatement();
             pStmt = dbConnection.prepareStatement(selectQuery);
 
-            managerCountQuery = executeQueryStatement(stmt, pStmt);
+            managerCountQuery = executeQueryStatement(pStmt);
             managerCountQuery.next();
             managerCount =  managerCountQuery.getInt("managerCount");
                         
@@ -90,7 +62,7 @@ public class FplManagerDBFactory {
             e.printStackTrace();
         } finally {
             managerCountQuery.close();
-            closeStatements(stmt, pStmt);
+            pStmt.close();
             dbConnection.close();
         }
 
@@ -100,7 +72,6 @@ public class FplManagerDBFactory {
     public Integer getGameweekCount() throws SQLException {
 
         Integer gameweekCount = -1;
-        Statement stmt = null;
         PreparedStatement pStmt = null;
         ResultSet gameweekResultSet = null;
 
@@ -108,10 +79,9 @@ public class FplManagerDBFactory {
             dbConnection = DatasourcePool.getDatabaseConnection();    
             
             String selectQuery = "Select count(*) gameweekCount FROM fpl_gameweeks";
-            stmt = dbConnection.createStatement();
             pStmt = dbConnection.prepareStatement(selectQuery);
 
-            gameweekResultSet = executeQueryStatement(stmt, pStmt);
+            gameweekResultSet = executeQueryStatement(pStmt);
             gameweekResultSet.next();
             gameweekCount =  gameweekResultSet.getInt("gameweekCount");
                         
@@ -119,7 +89,7 @@ public class FplManagerDBFactory {
             e.printStackTrace();
         } finally {
             gameweekResultSet.close();
-            closeStatements(stmt, pStmt);
+            pStmt.close();
             dbConnection.close();
         }
 
@@ -130,9 +100,8 @@ public class FplManagerDBFactory {
 
         dbConnection = DatasourcePool.getDatabaseConnection();
         String deleteQuery = "DELETE FROM fpl_managers";
-        Statement stmt = dbConnection.createStatement();
         PreparedStatement pStmt = dbConnection.prepareStatement(deleteQuery);
-        executeStatement(stmt, pStmt);
+        executeStatement(pStmt);
         dbConnection.close();
          
     }
@@ -142,9 +111,8 @@ public class FplManagerDBFactory {
         dbConnection = DatasourcePool.getDatabaseConnection();
 
         String deleteQuery = "DELETE FROM fpl_gameweeks";
-        Statement stmt = dbConnection.createStatement();
         PreparedStatement pStmt = dbConnection.prepareStatement(deleteQuery);
-        executeStatement(stmt, pStmt);
+        executeStatement(pStmt);
         dbConnection.close();
          
     }
@@ -158,12 +126,12 @@ public class FplManagerDBFactory {
 
     }
 
-    private void executeStatement(Statement stmt, PreparedStatement pStmt) throws SQLException {
+    private void executeStatement(PreparedStatement pStmt) throws SQLException {
+        
         try {
             pStmt.executeUpdate();
             pStmt.close();
         } catch (SQLException e) {
-            stmt.close();
             pStmt.close();
             if (e.getErrorCode()== 0) {
                 // e.printStackTrace();
@@ -171,12 +139,11 @@ public class FplManagerDBFactory {
                 e.printStackTrace();
             } 
         } finally {
-            stmt.close();
             pStmt.close();
         }
     }
 
-    private ResultSet executeQueryStatement(Statement stmt, PreparedStatement pStmt) throws SQLException {
+    private ResultSet executeQueryStatement(PreparedStatement pStmt) throws SQLException {
         ResultSet results = null;
         try {
             results = pStmt.executeQuery();
@@ -184,7 +151,6 @@ public class FplManagerDBFactory {
 
             
         } catch (Exception e) {
-            stmt.close();
             pStmt.close();
             e.printStackTrace();
         } finally {
@@ -196,16 +162,5 @@ public class FplManagerDBFactory {
         return results;
 
     }
-
-    private void closeStatements(Statement stmt, PreparedStatement pStmt) {
-        try {
-            stmt.close();
-            pStmt.close();
-        } catch (SQLException e) { 
-            e.printStackTrace();
-        }
-    }
-
-    
 
 }

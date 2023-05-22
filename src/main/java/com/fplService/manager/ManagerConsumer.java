@@ -1,7 +1,9 @@
 package com.fplService.manager;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -11,7 +13,11 @@ import org.apache.kafka.common.errors.WakeupException;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.gson.Gson;
+
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 
 public final class ManagerConsumer implements Runnable {
@@ -69,14 +75,28 @@ public final class ManagerConsumer implements Runnable {
     void pollManagerConsumer(Duration timeout) {
 
         Logger logger = LoggerFactory.getLogger(ManagerConsumer.class);
+        List<FplManager> fplManagerList = new ArrayList<FplManager>();
 
         logger.debug("Logging messages");
  
         ConsumerRecords<String, String> records = managerConsumer.poll(timeout);
         
-        logger.info("Number of records " + records.count());
+        logger.info("Number of managers in poll " + records.count());
+        if (records.count() != 0) {
 
-        new FplManagerDBFactory().storeManagersJSON(records);
+            for (ConsumerRecord<String, String> record : records) {
+                
+                logger.debug("topic = %s, partition = %d, offset = %d, " +
+                "customer = %s, country = %s\n",
+                record.topic(), record.partition(), record.offset(),
+                record.key(), record.value());
+
+                FplManager manager = new Gson().fromJson((record.value()), FplManager.class);
+                fplManagerList.add(manager);
+            }
+            
+            new FplManagerDBFactory().batchStoreManager(fplManagerList);
+        }
         
     }
 

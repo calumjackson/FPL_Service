@@ -1,8 +1,9 @@
 package com.fplService.gameweek;
 
-import java.sql.SQLException;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -12,7 +13,11 @@ import org.apache.kafka.common.errors.WakeupException;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.gson.Gson;
+
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 
 public final class GameweekConsumer implements Runnable {
@@ -70,16 +75,25 @@ public final class GameweekConsumer implements Runnable {
     void pollGameweekConsumer(Duration timeout) {
 
         Logger logger = LoggerFactory.getLogger(GameweekConsumer.class);
+        List<FplGameweek> fplGameweekList = new ArrayList<>();
 
         logger.debug("Starting to log");
         ConsumerRecords<String, String> records = gamweekConsumer.poll(timeout);
         
         logger.info("Number of gameweeks in poll :" + records.count());
         
-        try {
-            new FplGameweekDbConnector().storeGameweeksJSON(records);
-        } catch (SQLException e) {
-            logger.info(e.getMessage());
+        if (records.count() != 0) { 
+
+            for (ConsumerRecord<String, String> record : records) {
+                logger.debug("topic = %s, partition = %d, offset = %d, " +
+                "customer = %s, country = %s\n",
+                record.topic(), record.partition(), record.offset(),
+                record.key(), record.value());
+                FplGameweek fplgameweek = new Gson().fromJson((record.value()), FplGameweek.class);
+                fplGameweekList.add(fplgameweek);
+            }
+            
+            new FplGameweekDbConnector().batchStoreGameweeks(fplGameweekList);
         }
         
     }

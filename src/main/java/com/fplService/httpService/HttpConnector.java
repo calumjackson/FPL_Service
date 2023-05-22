@@ -5,6 +5,7 @@ import com.fplService.league.FplLeague;
 import com.fplService.league.LeagueResponseDecoder;
 import com.fplService.manager.FplManager;
 import com.fplService.manager.ManagerDetailsResponseDecoder;
+
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -23,11 +24,10 @@ import java.util.Map;
 public class HttpConnector {
 
     ObjectMapper mapper = new ObjectMapper();
-
-    OkHttpClient client = new OkHttpClient();
+    OkHttpClient client = FplClient.getFplClient();
     Logger logger;
 
-    Integer maxLeagueSize = 5000;
+    Integer maxLeagueSize = 500;
 
     public void generateApiRequest(Integer userId) {
 
@@ -35,7 +35,6 @@ public class HttpConnector {
         headers.put("Connection", "keep-alive");
 
         String fplUrl = "https://fantasy.premierleague.com/api/entry/"+userId+"/history/";
-
         
         Request request = getRequest(fplUrl);
 
