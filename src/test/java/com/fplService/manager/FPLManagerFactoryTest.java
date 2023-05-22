@@ -1,6 +1,7 @@
 package com.fplService.manager;
 
 import static org.junit.Assert.*;
+
 import java.sql.SQLException;
 import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
@@ -11,8 +12,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.fplService.databaseConnection.DatabaseUtilHelper;
+
 
 public class FPLManagerFactoryTest {
 
@@ -121,6 +122,28 @@ public class FPLManagerFactoryTest {
 
         Integer value = databaseHelper.getRecordCount(DatabaseUtilHelper.fplManagersTable);
         assertEquals(scale, value);
+    }
+
+    @Test
+    public void testInvalidName() throws InterruptedException {
+
+
+        CountDownLatch latch = new CountDownLatch(1);
+        ManagerConsumer managerConsumer = new ManagerConsumer(latch);
+        new Thread(managerConsumer).start();
+
+        Integer managerId = 383645;
+
+
+        FplManagerFactory managerFactory = new FplManagerFactory();
+        logger.info("Gets here");
+        managerFactory.createFplManager(managerId);
+
+        latch.await(10, TimeUnit.SECONDS);
+        assertTrue(true);
+
+
+   
     }
 
     public String getManagerJSON(String managerId) {

@@ -29,6 +29,14 @@ public class HttpConnector {
 
     Integer maxLeagueSize = 500;
 
+    public Integer getMaxLeagueSize() {
+        return maxLeagueSize;
+    }
+
+    public void setMaxLeagueSize(Integer maxLeagueSize) {
+        this.maxLeagueSize = maxLeagueSize;
+    }
+
     public void generateApiRequest(Integer userId) {
 
         Map<String, String> headers = new HashMap<>();
@@ -58,6 +66,7 @@ public class HttpConnector {
     }
 
     public FplManager getManagerDetailsFromFPL(Integer userId) {
+        logger = LoggerFactory.getLogger(HttpConnector.class);
 
         Map<String, String> headers = new HashMap<>();
         headers.put("Connection", "keep-alive");

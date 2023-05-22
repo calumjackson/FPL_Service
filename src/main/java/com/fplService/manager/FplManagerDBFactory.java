@@ -28,7 +28,7 @@ public class FplManagerDBFactory {
                 pStmt.addBatch();
             }
             int[] updateCounts = pStmt.executeBatch();
-            logger.debug(Arrays.toString(updateCounts));
+            logger.info(Arrays.toString(updateCounts));
             
         } catch (SQLException e) {
             logger.info(e.getMessage());

@@ -33,7 +33,7 @@ public class Main {
             Integer leagueId = 57365;
             
             // Get the league details
-            FplLeague fplLeague = new FplLeagueFactory().createFplLeage(leagueId);
+            FplLeague fplLeague = new FplLeagueFactory().requestFplLeagueDetails(leagueId);
             List<Integer> managerIds = fplLeague.getManagerIds();
             
             managerConsumer = new ManagerConsumer(latch);

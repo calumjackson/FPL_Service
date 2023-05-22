@@ -11,8 +11,10 @@ public class FplManagerFactory {
     Logger logger;
 
     public void createFplManager(Integer managerId) {
-        logger = LoggerFactory.getLogger(FplManager.class);
+        logger = LoggerFactory.getLogger(FplManagerFactory.class);
+        logger.debug("Retrieving manager info");
         FplManager fplManager = requestFplManagerDetails(managerId);
+        logger.debug(fplManager.getManagerFirstName());
 
         try {
             logger.debug("Creating manager " + managerId);
