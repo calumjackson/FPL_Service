@@ -25,6 +25,7 @@ public class ManagerProducer {
             producerProps.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
             producerProps.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
             producerProps.setProperty(ProducerConfig.LINGER_MS_CONFIG, "2500");
+
             KafkaProducer<String, String> producer = new KafkaProducer<>(producerProps);
     
             managerProducer = producer;

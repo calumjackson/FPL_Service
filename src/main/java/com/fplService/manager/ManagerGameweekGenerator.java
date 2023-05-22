@@ -14,13 +14,14 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fplService.gameweek.FplGameweekFactory;
 import com.google.gson.Gson;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 
-public final class ManagerConsumer implements Runnable {
+public final class ManagerGameweekGenerator implements Runnable {
 
     public static final String MANAGER_TOPIC = "fpl_managers";
     private KafkaConsumer<String, String> managerConsumer;
@@ -28,12 +29,12 @@ public final class ManagerConsumer implements Runnable {
     Logger logger;
     private static Integer TIMEOUT_LENGTH = 5000;
 
-    public ManagerConsumer(CountDownLatch latch) {
+    public ManagerGameweekGenerator(CountDownLatch latch) {
         this.latch = latch;
-        logger = LoggerFactory.getLogger(ManagerConsumer.class);
+        logger = LoggerFactory.getLogger(ManagerGameweekGenerator.class);
     }
 
-    public void createTeamConsumer() {
+    public void createManagerGameweekConsumer() {
 
         String boostrapServers = "127.0.0.1:9092";
 
@@ -43,6 +44,7 @@ public final class ManagerConsumer implements Runnable {
         consumerProps.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         consumerProps.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         consumerProps.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
+        consumerProps.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "GameweekGenerator");
         
         KafkaConsumer<String, String> consumer = new KafkaConsumer<String, String>(consumerProps);
 
@@ -62,7 +64,7 @@ public final class ManagerConsumer implements Runnable {
                 
             }
         } catch (WakeupException e) {
-            System.out.println("Manager Consumer Woken up");
+            System.out.println("Manager Gameweek Consumer Woken up");
         } finally {
             managerConsumer.commitAsync();
             managerConsumer.close();
@@ -73,14 +75,14 @@ public final class ManagerConsumer implements Runnable {
 
     void pollManagerConsumer(Duration timeout) {
 
-        Logger logger = LoggerFactory.getLogger(ManagerConsumer.class);
+        Logger logger = LoggerFactory.getLogger(ManagerGameweekGenerator.class);
         List<FplManager> fplManagerList = new ArrayList<FplManager>();
-
-        logger.debug("Logging messages");
- 
+        FplGameweekFactory fplGameweekFactory = new FplGameweekFactory();
+        
+        logger.debug("Logging gameweeks to generate");
         ConsumerRecords<String, String> records = managerConsumer.poll(timeout);
         
-        logger.info("Number of managers in poll " + records.count());
+        logger.debug("Number of managers in gameweek poll " + records.count());
         if (records.count() != 0) {
 
             for (ConsumerRecord<String, String> record : records) {
@@ -98,9 +100,11 @@ public final class ManagerConsumer implements Runnable {
                     throw e;
                 }
             }
+            for (FplManager manager : fplManagerList) {
+                logger.debug("Adding managers");
+                fplGameweekFactory.createManagerGameweek(manager.getManagerId());
+            }
             
-            new FplManagerDBUtil().batchStoreManager(fplManagerList);
-
         }
         
     }
@@ -111,7 +115,7 @@ public final class ManagerConsumer implements Runnable {
 
     @Override
     public void run() {
-        createTeamConsumer();
+        createManagerGameweekConsumer();
         receiveMessage();
     }
 

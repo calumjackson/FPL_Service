@@ -21,6 +21,11 @@ public class FplGameweekFactory {
         return fplGameweeks.size();
     }
 
+    public Integer getManagerGameweekCount(Integer managerId) {
+        List<FplGameweek> fplGameweeks = requestGameweekDetails(managerId);         
+        return fplGameweeks.size();
+    }
+
     private List<FplGameweek> requestGameweekDetails(Integer managerId) {
         HttpConnector okhttpConnector = new HttpConnector();
         List<FplGameweek> fplGameweeks = okhttpConnector.getGameweekDetailsFromFPL(managerId);

@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 
 import com.fplService.databaseConnection.DatabaseUtilHelper;
 import com.fplService.databaseUtils.DatasourcePool;
-import com.fplService.databaseUtils.FplDatabaseConnector;
 
 public class GameweekFactoryTest {
     
@@ -26,7 +25,6 @@ public class GameweekFactoryTest {
     @Before
     public void setupTestConfigs() throws SQLException {
         DatasourcePool.initiateDatabasePool();
-        FplDatabaseConnector.getFplDbConnection();
         logger = LoggerFactory.getLogger(GameweekFactoryTest.class);
         databaseHelper = new DatabaseUtilHelper();
         GameweekProducer.createGameweekProducer();

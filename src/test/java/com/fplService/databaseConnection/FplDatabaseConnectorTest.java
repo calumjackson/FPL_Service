@@ -8,7 +8,8 @@ import java.sql.SQLException;
 import org.junit.After;
 import org.junit.Test;
 
-import com.fplService.databaseUtils.FplDatabaseConnector;
+import com.fplService.databaseUtils.DatasourcePool;
+
 
 public class FplDatabaseConnectorTest {
 
@@ -18,7 +19,7 @@ public class FplDatabaseConnectorTest {
     public void testDatabaseConnection() {
 
         try {
-            connection = FplDatabaseConnector.getFplDbConnection();
+            connection = DatasourcePool.getDatabaseConnection();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -28,7 +29,7 @@ public class FplDatabaseConnectorTest {
 
     @After
     public void CloseConnection() throws SQLException {
-        FplDatabaseConnector.closeDatabaseConnection();
+        DatasourcePool.closeConnectionPool();
     }
 
 

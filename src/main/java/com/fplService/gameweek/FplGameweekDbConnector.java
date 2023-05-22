@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fplService.databaseUtils.DatasourcePool;
-import com.fplService.databaseUtils.FplDatabaseConnector;
 
 public class FplGameweekDbConnector {
 
@@ -16,7 +15,7 @@ public class FplGameweekDbConnector {
 
     public void batchStoreGameweeks(List<FplGameweek> fplGameweekList) {
 
-        Logger logger = LoggerFactory.getLogger(FplDatabaseConnector.class);
+        Logger logger = LoggerFactory.getLogger(FplGameweekDbConnector.class);
         
         String insertQuery = "INSERT INTO fpl_gameweeks(manager_id, gameweek_id, season_id, week_points, bench_points, transfer_point_deductions) VALUES (?, ?, ?, ?, ?, ?)";
         PreparedStatement pStmt = null;

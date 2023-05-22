@@ -9,13 +9,13 @@ import org.slf4j.LoggerFactory;
 
 import com.fplService.databaseUtils.DatasourcePool;
 
-public class FplManagerDBFactory {
+public class FplManagerDBUtil {
 
     Connection dbConnection = null;
 
     public void batchStoreManager(List<FplManager> managers) {
 
-        Logger logger = LoggerFactory.getLogger(FplManagerDBFactory.class);
+        Logger logger = LoggerFactory.getLogger(FplManagerDBUtil.class);
         try {
             dbConnection = DatasourcePool.getDatabaseConnection();
             
@@ -28,7 +28,7 @@ public class FplManagerDBFactory {
                 pStmt.addBatch();
             }
             int[] updateCounts = pStmt.executeBatch();
-            logger.info(Arrays.toString(updateCounts));
+            logger.debug(Arrays.toString(updateCounts));
             
         } catch (SQLException e) {
             logger.info(e.getMessage());

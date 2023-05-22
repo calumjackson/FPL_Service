@@ -21,7 +21,7 @@ public class Main {
         Logger logger = LoggerFactory.getLogger(Main.class);
         logger.debug("Log mesage 1");
 
-        ManagerConsumer managerConsumer = null;
+        ManagerGameweekGenerator managerConsumer = null;
         GameweekConsumer gameweekConsumer = null;
         new GameweekProducer();
         new ManagerProducer();
@@ -36,9 +36,9 @@ public class Main {
             FplLeague fplLeague = new FplLeagueFactory().requestFplLeagueDetails(leagueId);
             List<Integer> managerIds = fplLeague.getManagerIds();
             
-            managerConsumer = new ManagerConsumer(latch);
+            managerConsumer = new ManagerGameweekGenerator(latch);
             new Thread(managerConsumer).start();
-            Runtime.getRuntime().addShutdownHook(new Thread(new ManagerConsumerCloser(managerConsumer)));
+            Runtime.getRuntime().addShutdownHook(new Thread(new ManagerGameweekGeneratorCloser(managerConsumer)));
             
             gameweekConsumer = new GameweekConsumer(latch);
             new Thread(gameweekConsumer).start();
@@ -79,8 +79,8 @@ public class Main {
     }
 
     private static void clearDownData() throws SQLException {
-        new FplManagerDBFactory().deleteAllManagers();
-        new FplManagerDBFactory().deleteAllGameweeks();
+        new FplManagerDBUtil().deleteAllManagers();
+        new FplManagerDBUtil().deleteAllGameweeks();
         
     }
 

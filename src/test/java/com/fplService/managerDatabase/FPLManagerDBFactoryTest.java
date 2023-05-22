@@ -5,7 +5,7 @@ import java.sql.SQLException;
 
 import org.junit.Test;
 
-import com.fplService.manager.FplManagerDBFactory;
+import com.fplService.manager.FplManagerDBUtil;
 
 public class FPLManagerDBFactoryTest {
     
@@ -13,7 +13,7 @@ public class FPLManagerDBFactoryTest {
     public void testDeleteAllManagers() {
 
         Integer managerCountValue = -1;
-        FplManagerDBFactory managerFactory = new FplManagerDBFactory();
+        FplManagerDBUtil managerFactory = new FplManagerDBUtil();
         try {
             managerFactory.deleteAllManagers();
         } catch (SQLException e) {
@@ -34,7 +34,7 @@ public class FPLManagerDBFactoryTest {
     public void testDeleteAllGameweeks() {
 
         Integer gameweekCountValue = -1;
-        FplManagerDBFactory managerFactory = new FplManagerDBFactory();
+        FplManagerDBUtil managerFactory = new FplManagerDBUtil();
         try {
             managerFactory.deleteAllGameweeks();
         } catch (SQLException e) {
