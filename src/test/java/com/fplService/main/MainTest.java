@@ -5,7 +5,6 @@ import static org.junit.Assert.assertEquals;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.After;
@@ -34,6 +33,7 @@ public class MainTest {
     static CountDownLatch latch;
     Logger logger;
     Integer numberOfGameweeks = 37;
+    Integer maxLeagueSize = 500;
 
     
     @Before
@@ -74,22 +74,29 @@ public class MainTest {
     @Test
     public void testFlowWithLadsLeague() {
         Integer leagueId = 57365;
-        testMainFlow(leagueId);
+        testMainFlow(leagueId, maxLeagueSize);
     }
 
     @Test
     public void testFlowWithtwoPageLeague() {
         Integer leagueId = 57380;
-        testMainFlow(leagueId);
+        testMainFlow(leagueId, maxLeagueSize);
     }
 
     @Test
     public void testFlowWithLargerLeague() {
         Integer leagueId = 11;
-        testMainFlow(leagueId);
+        testMainFlow(leagueId, maxLeagueSize);
     }
 
-    public void testMainFlow(Integer leagueId) {
+    @Test
+    public void testFlowWithLargestLeague() {
+        Integer maxLeagueSize = 3000;
+        Integer leagueId = 11;
+        testMainFlow(leagueId, maxLeagueSize);
+    }
+
+    public void testMainFlow(Integer leagueId, Integer maxLeagueSize) {
 
         logger.debug("Log message Starting");
         logger.info("Manager Records: " + databaseHelper.getRecordCount(DatabaseUtilHelper.fplManagersTable));
@@ -99,7 +106,7 @@ public class MainTest {
         
         try {           
             // Get the league details
-            FplLeague fplLeague = new FplLeagueFactory().createFplLeage(leagueId);
+            FplLeague fplLeague = new FplLeagueFactory().requestFplLeagueDetails(leagueId, maxLeagueSize);
             List<Integer> managerIds = fplLeague.getManagerIds();
             managerCount = managerIds.size();
             logger.info("Managers: " + managerCount);
@@ -120,8 +127,6 @@ public class MainTest {
             checkDatabaseUpdates(DatabaseUtilHelper.fplManagersTable);
             checkDatabaseUpdates(DatabaseUtilHelper.fplGameweekTable);
 
-            
-            latch.await(5, TimeUnit.SECONDS);
         } catch (Exception e){
             e.printStackTrace();   
         }
@@ -135,12 +140,13 @@ public class MainTest {
         Integer databaseCount = 0;
         Boolean isUpdating = true;
         Integer attemptcount = 0;
+        Integer sleepTimer = 500;
         while (isUpdating) {
             Integer newCount = databaseHelper.getRecordCount(tableName);
             logger.debug("DatabaseCount: " + databaseCount + ", newCount" + newCount);
             if (databaseCount.equals(newCount)) {
                 logger.info("Databases A: " + databaseCount);
-                Thread.sleep(3000);
+                Thread.sleep(sleepTimer);
                 if (attemptcount > 3) {
                     isUpdating=false;
                 }
@@ -148,7 +154,7 @@ public class MainTest {
 
             } else {
                 databaseCount = newCount;
-                Thread.sleep(3000);
+                Thread.sleep(sleepTimer);
                 logger.info("Databases B: " + databaseCount);
                 attemptcount = 1;
             };

@@ -6,12 +6,15 @@ import com.fplService.httpService.HttpConnector;
 public class FplLeagueFactory {
 
     
-    public FplLeague createFplLeage(Integer leagueId) {
-        return requestFplLeagueDetails(leagueId);
+    public FplLeague requestFplLeagueDetails(Integer leagueId) {
+        HttpConnector okhttpConnector = new HttpConnector();
+        FplLeague fplLeague = okhttpConnector.getLeagueDetailsFromFpl(leagueId);
+        return fplLeague;
     }
 
-    private FplLeague requestFplLeagueDetails(Integer leagueId) {
+    public FplLeague requestFplLeagueDetails(Integer leagueId, Integer maxLeagueSize) {
         HttpConnector okhttpConnector = new HttpConnector();
+        okhttpConnector.setMaxLeagueSize(maxLeagueSize);
         FplLeague fplLeague = okhttpConnector.getLeagueDetailsFromFpl(leagueId);
         return fplLeague;
     }

@@ -91,8 +91,13 @@ public final class ManagerConsumer implements Runnable {
                 record.topic(), record.partition(), record.offset(),
                 record.key(), record.value());
 
-                FplManager manager = new Gson().fromJson((record.value()), FplManager.class);
-                fplManagerList.add(manager);
+                try {
+                    FplManager manager = new Gson().fromJson((record.value()), FplManager.class);
+                    fplManagerList.add(manager);
+                } catch (Exception e) {
+                    logger.info("GSON error:" + e.getMessage());
+                    throw e;
+                }
             }
             
             new FplManagerDBFactory().batchStoreManager(fplManagerList);
