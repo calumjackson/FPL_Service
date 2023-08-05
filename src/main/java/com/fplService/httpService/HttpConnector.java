@@ -5,7 +5,6 @@ import com.fplService.league.FplLeague;
 import com.fplService.league.LeagueResponseDecoder;
 import com.fplService.manager.FplManager;
 import com.fplService.manager.ManagerDetailsResponseDecoder;
-import com.fplService.playerStats.FplPlayerDecoder;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;

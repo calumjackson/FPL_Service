@@ -17,3 +17,16 @@ CREATE TABLE IF NOT EXISTS public.fpl_managers
     team_name character varying(50) NOT NULL,
     CONSTRAINT fpl_manager_id_pk UNIQUE (manager_id)
 )
+
+CREATE TABLE IF NOT EXISTS public.fpl_players
+(
+    player_id integer NOT NULL,
+    player_first_name character varying(100),
+    player_second_name character varying(100),
+    team_id integer NOT NULL,
+    position_id integer NOT NULL,
+    selected_by_percent float NOT NULL,
+    player_value INTEGER NOT NULL,
+
+    CONSTRAINT fpl_player_id_pk UNIQUE (player_id)
+)

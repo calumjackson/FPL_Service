@@ -75,7 +75,7 @@ public class GameweekCounter implements Runnable {
 
         Logger logger = LoggerFactory.getLogger(GameweekCounter.class);
         ConsumerRecords<String, String> records = gameweekConsumer.poll(timeout);
-        gameweekCounter += records.count();        
+        gameweekCounter += records.count();     
         
     }
 

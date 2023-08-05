@@ -1,11 +1,7 @@
 package com.fplService.playerStats;
 
-import org.apache.kafka.clients.producer.ProducerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.fplService.httpService.HttpConnector;
-import com.fplService.manager.FplManager;
 import com.fplService.manager.FplManagerFactory;
 
 

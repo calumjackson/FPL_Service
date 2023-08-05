@@ -7,7 +7,18 @@ public class FplPlayer {
     private Integer id; //id
     private Integer element_type; // position
     private Integer team; //team
-    
+    private Float selected_by_percent;
+    private Integer now_cost;
+
+
+    public Integer getNow_cost() {
+        return now_cost;
+    }
+
+    public void setNow_cost(Integer now_cost) {
+        this.now_cost = now_cost;
+    }
+
     public FplPlayer(String playerFirstName, String playerLastName, Integer playerId, Integer playerPosition,
             Integer playerTeam) {
         this.first_name = playerFirstName;
@@ -46,6 +57,14 @@ public class FplPlayer {
     }
     public void setTeam(Integer playerTeam) {
         this.team = playerTeam;
+    }
+
+    public Float getSelected_by_percent() {
+        return selected_by_percent;
+    }
+
+    public void setSelected_by_percent(Float selected_by_percent) {
+        this.selected_by_percent = selected_by_percent;
     }
 
     public String toString() {
