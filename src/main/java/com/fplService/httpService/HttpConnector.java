@@ -5,6 +5,7 @@ import com.fplService.league.FplLeague;
 import com.fplService.league.LeagueResponseDecoder;
 import com.fplService.manager.FplManager;
 import com.fplService.manager.ManagerDetailsResponseDecoder;
+import com.fplService.playerStats.FplPlayerDecoder;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -80,6 +81,30 @@ public class HttpConnector {
             response = client.newCall(request).execute();            
             String managerJsonString = response.body().string();
             return new ManagerDetailsResponseDecoder().decodeResponse(managerJsonString);
+            
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            response.close();
+        }
+    }
+
+    public String getPlayerBootstrap() {
+        logger = LoggerFactory.getLogger(HttpConnector.class);
+
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Connection", "keep-alive");
+
+        String fplUrl = "https://fantasy.premierleague.com/api/bootstrap-static/";
+
+        Request request = getRequest(fplUrl);
+
+        Response response = null;
+        try {
+            response = client.newCall(request).execute();            
+            String playerListJson = response.body().string();
+            return playerListJson;
+
             
         } catch (IOException e) {
             throw new RuntimeException(e);

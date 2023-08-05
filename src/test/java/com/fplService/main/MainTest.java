@@ -4,14 +4,20 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+
 
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.internal.matchers.CompareTo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,27 +43,32 @@ public class MainTest {
     
     public static DatabaseUtilHelper databaseHelper;
     static CountDownLatch latch;
-    Logger logger;
+    static Logger logger;
     Integer numberOfGameweeks = 37;
     Integer maxLeagueSize = 500;
 
     
-    @Before
-    public void initiateDatabaseHelper() throws SQLException {
+    @BeforeClass
+    public static void initiateDatabaseHelper() throws SQLException {
         logger = LoggerFactory.getLogger(MainTest.class);
         databaseHelper = new DatabaseUtilHelper();
         databaseHelper.startConnections();
-        clearDownData();
     }
-    
+
     @Before
-    public void setupProducers() {
+    public void clearDB() throws SQLException {
+        logger = LoggerFactory.getLogger(MainTest.class);
+        clearDownData();
+    }    
+    
+    @BeforeClass
+    public static void setupProducers() {
         new GameweekProducer();
         new ManagerProducer();
     }
-    // 
-    @Before
-    public void setupConsumers() {
+    
+    @BeforeClass
+    public static void setupConsumers() {
         latch = new CountDownLatch(3);
 
         ManagerConsumer managerConsumer = new ManagerConsumer(latch);
@@ -80,7 +91,12 @@ public class MainTest {
     }
 
     @After
-    public void tearDown() {
+    public void tearDownCounter() {
+        GameweekCounter.resetGameweekCounter();  
+    }
+
+    @AfterClass
+    public static void tearDown() {
         databaseHelper.closeConnection();
         closeDatabase();
         closeProducers();      
@@ -93,6 +109,7 @@ public class MainTest {
         Integer leagueId = 57365;
         testMainFlow(leagueId, maxLeagueSize);
     }
+
 
     @Test
     public void testFlowWithtwoPageLeague() {
@@ -132,6 +149,7 @@ public class MainTest {
             // Create all the managers in the league
             for (Integer managerId : managerIds) {
                 new FplManagerFactory().createFplManager(managerId);
+                
             }
 
             // // Get the gameweek totals for each manager.
@@ -139,7 +157,6 @@ public class MainTest {
                 gameweekCount += populateGameweekTotals(managerId);
             }
              
-            
             // Wait a little bit for the messages to be processed on the separate threads
             checkDatabaseUpdates(DatabaseUtilHelper.fplManagersTable);
             checkDatabaseUpdates(DatabaseUtilHelper.fplGameweekTable);
@@ -165,15 +182,18 @@ public class MainTest {
         while (isUpdating) {
             Integer newCount = databaseHelper.getRecordCount(tableName);
             logger.debug("DatabaseCount: " + databaseCount + ", newCount" + newCount);
-            if (databaseCount.equals(newCount)) {
+            if(attemptcount == 0) {
+                databaseCount = newCount;
+                attemptcount++;
+            } else if (databaseCount.equals(newCount)) {
                 logger.info("Databases A: " + databaseCount);
                 Thread.sleep(sleepTimer);
-                if (attemptcount > 3) {
+                if (attemptcount > 2) {
                     isUpdating=false;
                 }
                 attemptcount++;
 
-            } else {
+            } else  {
                 databaseCount = newCount;
                 Thread.sleep(sleepTimer);
                 logger.info("Databases B: " + databaseCount);
@@ -199,7 +219,7 @@ public class MainTest {
     public void testDatabaseCheck5k() throws InterruptedException {
         Integer gameweeksToGenerate = 5000;
         generateGameweeks(gameweeksToGenerate);
-        Thread.sleep(2000);
+        Thread.sleep(1000);
         try {
             checkDatabaseUpdates(DatabaseUtilHelper.fplGameweekTable);
         } catch (InterruptedException e) {

@@ -16,7 +16,7 @@ public class FplGameweekDbConnector {
     public void batchStoreGameweeks(List<FplGameweek> fplGameweekList) {
 
         Logger logger = LoggerFactory.getLogger(FplGameweekDbConnector.class);
-        
+        int[] updateCounts = null;
         String insertQuery = "INSERT INTO fpl_gameweeks(manager_id, gameweek_id, season_id, week_points, bench_points, transfer_point_deductions) VALUES (?, ?, ?, ?, ?, ?)";
         PreparedStatement pStmt = null;
         
@@ -28,15 +28,15 @@ public class FplGameweekDbConnector {
                 buildInsertGameweekStatement(gameweek, pStmt);
                 pStmt.addBatch();
             }
-            int[] updateCounts = pStmt.executeBatch();
+            updateCounts = pStmt.executeBatch();
             logger.debug(Arrays.toString(updateCounts));
-
 
         } catch (SQLException e) {
             
             if (e.getErrorCode()== 0) {
                 e.printStackTrace();
             } else { 
+                logger.info(Arrays.toString(updateCounts));
                 e.printStackTrace();
             } 
         } finally {

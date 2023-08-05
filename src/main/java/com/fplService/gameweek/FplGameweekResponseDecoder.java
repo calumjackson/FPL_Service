@@ -27,8 +27,11 @@ public class FplGameweekResponseDecoder {
         return gameweeks;
     }    
 
-
+    
     class ManagerGameweeks {
+        
+        GameweekData[] current;
+
         public GameweekData[] getCurrent() {
             return current;
         }
@@ -37,7 +40,6 @@ public class FplGameweekResponseDecoder {
             this.current = current;
         }
 
-        GameweekData[] current;
 
 
         public String toString() {

@@ -32,7 +32,8 @@ public class GameweekCounter implements Runnable {
 
     public void startGameweekCounterConsumer() {
 
-        String boostrapServers = "127.0.0.1:9092";
+        // String boostrapServers = "127.0.0.1:9092";
+        String boostrapServers = "13.40.213.178:9092";
 
         Properties consumerProps = new Properties();
         consumerProps.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, boostrapServers);

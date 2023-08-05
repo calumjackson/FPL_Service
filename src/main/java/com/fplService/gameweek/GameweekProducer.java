@@ -23,7 +23,9 @@ public class GameweekProducer {
 
         Logger logger = LoggerFactory.getLogger(GameweekProducer.class);
     
-        String boostrapServers = "localhost:9092"; 
+        // String boostrapServers = "localhost:9092"; 
+        String boostrapServers = "13.40.213.178:9092";
+
     
             Properties producerProps = new Properties();
             producerProps.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, boostrapServers);
