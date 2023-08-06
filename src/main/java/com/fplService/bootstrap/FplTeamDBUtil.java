@@ -1,4 +1,4 @@
-package com.fplService.playerStats;
+package com.fplService.bootstrap;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,24 +10,23 @@ import org.slf4j.LoggerFactory;
 
 import com.fplService.databaseUtils.DatasourcePool;
 
-public class FplPlayerDBUtil {
+public class FplTeamDBUtil {
     
     Logger logger;
     Connection dbConnection = null;
 
-    public void batchStoreManager(FplPlayerList playerList) {
+    public void batchStoreTeams(FplTeamList playerList) {
 
-        logger = LoggerFactory.getLogger(FplPlayerDBUtil.class);
+        logger = LoggerFactory.getLogger(FplTeamDBUtil.class);
         try {
             dbConnection = DatasourcePool.getDatabaseConnection();
             
-            String insertQuery = "INSERT INTO fpl_players(player_id, player_first_name, player_second_name, team_id, "
-                + " position_id, selected_by_percent, player_value, player_position) "
-                + " VALUES (?, ?, ?, ?, ?, ?, ?, ?)";            
+            String insertQuery = "INSERT INTO fpl_teams(team_id, team_name)" 
+            + " VALUES (?, ?)";            
             PreparedStatement pStmt = dbConnection.prepareStatement(insertQuery);
-            logger.debug("Batch size: " + playerList.elements.length);
+            logger.debug("Batch size: " + playerList.teams.length);
 
-            for (FplPlayer player : playerList.elements) {
+            for (FPLTeams player : playerList.teams) {
                 buildInsertPlayerStatement(player, pStmt);
                 pStmt.addBatch();
             }
@@ -48,31 +47,24 @@ public class FplPlayerDBUtil {
 
     
 
-    private void buildInsertPlayerStatement(FplPlayer player, PreparedStatement pStmt) throws SQLException {
+    private void buildInsertPlayerStatement(FPLTeams team, PreparedStatement pStmt) throws SQLException {
         
         // player_id, player_first_name, player_second_name, 
         // team_id, position_id, selected_by_percent
-        // now_cost, player_position
-        pStmt.setInt(1, player.getId());
-        pStmt.setString(2, player.getFirst_name());
-        pStmt.setString(3, player.getSecond_name());
-        pStmt.setInt(4, player.getTeam());
-        pStmt.setInt(5, player.getElement_type());
-        pStmt.setFloat(6, player.getSelected_by_percent());
-        pStmt.setInt(7, player.getNow_cost());
-        pStmt.setString(8, player.position_converter());
+        // now_cost
+        pStmt.setInt(1, team.getId());
+        pStmt.setString(2, team.getName());
+        
 
     }
 
-    public void deleteAllPlayers() throws SQLException {
+    public void deleteAllTeams() throws SQLException {
 
         dbConnection = DatasourcePool.getDatabaseConnection();
-        String deleteQuery = "DELETE FROM fpl_players";
+        String deleteQuery = "DELETE FROM fpl_teams";
         dbConnection.createStatement().execute(deleteQuery);
         dbConnection.close();
     }
-
-    
     
 
 }

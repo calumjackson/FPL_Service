@@ -8,6 +8,9 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fplService.bootstrap.FplTeamDBUtil;
+import com.fplService.bootstrap.FplTeamDecoder;
+import com.fplService.bootstrap.FplTeamList;
 import com.fplService.httpConnector.TestHttpConnector;
 import com.fplService.httpService.HttpConnector;
 import com.fplService.playerStats.FplPlayerDBUtil;
@@ -22,6 +25,7 @@ public class FplPlayerTest {
     public static void burnDownPlayerList() {
         try {
             new FplPlayerDBUtil().deleteAllPlayers();
+            new FplTeamDBUtil().deleteAllTeams();
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -35,7 +39,7 @@ public class FplPlayerTest {
 
         logger = LoggerFactory.getLogger(TestHttpConnector.class);
         try {
-            String playerListString = connector.getPlayerBootstrap();
+            String playerListString = connector.getBootstrap();
             System.out.println(playerListString);
             // decoder.decodeResponse(null);
 
@@ -54,7 +58,7 @@ public class FplPlayerTest {
 
         logger = LoggerFactory.getLogger(TestHttpConnector.class);
         try {
-            String playerListString = connector.getPlayerBootstrap();
+            String playerListString = connector.getBootstrap();
             FplPlayerList playerList = decoder.decodeResponse(playerListString);
             
             for (Integer x = 0; x<30; x++) {
@@ -77,7 +81,7 @@ public class FplPlayerTest {
 
         logger = LoggerFactory.getLogger(TestHttpConnector.class);
         try {
-            String playerListString = connector.getPlayerBootstrap();
+            String playerListString = connector.getBootstrap();
             playerList = decoder.decodeResponse(playerListString);
             
             for (Integer x = 0; x<30; x++) {
@@ -91,6 +95,33 @@ public class FplPlayerTest {
             throw new RuntimeException(e);
         }
         assertTrue(playerList.getElements().length>0);
+
+    }
+
+
+    @Test
+    public void decodeAndCommitBootstrapTeams() {
+
+        FplTeamDecoder decoder = new FplTeamDecoder();
+        HttpConnector connector = new HttpConnector();
+        FplTeamList teamList = null;
+
+        logger = LoggerFactory.getLogger(TestHttpConnector.class);
+        try {
+            String teamListString = connector.getBootstrap();
+            teamList = decoder.decodeResponse(teamListString);
+            
+            for (Integer x = 0; x<20; x++) {
+                System.out.println(teamList.getTeams()[x].getName());
+            }
+
+            FplTeamDBUtil dbUtil = new FplTeamDBUtil();
+            dbUtil.batchStoreTeams(teamList);
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        assertTrue(teamList.getTeams().length>0);
 
     }
 

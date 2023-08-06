@@ -23,7 +23,7 @@ public class FplPlayerDecoder {
     public FplPlayerList requestPlayerBootstrap() {
 
         HttpConnector okhttpConnector = new HttpConnector();
-        String fplPlayers = okhttpConnector.getPlayerBootstrap();
+        String fplPlayers = okhttpConnector.getBootstrap();
         FplPlayerList fplPlayersList = decodeResponse(fplPlayers);
         return fplPlayersList;
     }

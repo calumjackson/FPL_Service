@@ -88,7 +88,7 @@ public class HttpConnector {
         }
     }
 
-    public String getPlayerBootstrap() {
+    public String getBootstrap() {
         logger = LoggerFactory.getLogger(HttpConnector.class);
 
         Map<String, String> headers = new HashMap<>();

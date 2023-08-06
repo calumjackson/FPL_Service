@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS public.fpl_managers
     CONSTRAINT fpl_manager_id_pk UNIQUE (manager_id)
 )
 
+
 CREATE TABLE IF NOT EXISTS public.fpl_players
 (
     player_id integer NOT NULL,
@@ -27,6 +28,14 @@ CREATE TABLE IF NOT EXISTS public.fpl_players
     position_id integer NOT NULL,
     selected_by_percent float NOT NULL,
     player_value INTEGER NOT NULL,
+    player_position character varying(100),
 
     CONSTRAINT fpl_player_id_pk UNIQUE (player_id)
+)
+
+CREATE TABLE IF NOT EXISTS public.fpl_teams
+(
+    team_id integer,
+    team_name character varying(100) COLLATE pg_catalog."default",
+    CONSTRAINT fpl_team_id_pk UNIQUE (team_id)
 )

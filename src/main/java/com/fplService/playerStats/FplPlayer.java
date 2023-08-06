@@ -11,6 +11,22 @@ public class FplPlayer {
     private Integer now_cost;
 
 
+    public String position_converter() {
+        Integer position = this.getElement_type();
+        String pos_string = "Unknown";
+        if (position == 1) {
+            pos_string = "Goalkeeper";
+        } else if (position == 2) {
+            pos_string = "Defender";
+        } else if (position == 3) {
+            pos_string = "Midfielder";
+        } else if (position == 4) {
+            pos_string = "Forward";
+        }
+        return pos_string;
+    }
+
+
     public Integer getNow_cost() {
         return now_cost;
     }
