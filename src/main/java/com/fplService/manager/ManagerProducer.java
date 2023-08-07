@@ -7,6 +7,8 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
 
+import com.fplService.config.ConfigFile;
+
 public class ManagerProducer {
 
     public static final String MANAGER_TOPIC = "fpl_managers";
@@ -19,7 +21,7 @@ public class ManagerProducer {
     public void createTeamProducer() {
 
         // String boostrapServers = "localhost:9092"; 
-        String boostrapServers = "13.40.213.178:9092";
+        String boostrapServers = ConfigFile.HOSTIP+":9092";
     
             Properties producerProps = new Properties();
             producerProps.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, boostrapServers);

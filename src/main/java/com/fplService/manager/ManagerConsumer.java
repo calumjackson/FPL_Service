@@ -14,6 +14,7 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fplService.config.ConfigFile;
 import com.google.gson.Gson;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -36,7 +37,7 @@ public final class ManagerConsumer implements Runnable {
     public void createTeamConsumer() {
 
         // String boostrapServers = "127.0.0.1:9092";
-        String boostrapServers = "13.40.213.178:9092";
+        String boostrapServers = ConfigFile.HOSTIP+":9092";
 
 
         Properties consumerProps = new Properties();

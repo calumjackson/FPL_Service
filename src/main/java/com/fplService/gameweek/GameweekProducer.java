@@ -9,6 +9,8 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fplService.config.ConfigFile;
+
 public class GameweekProducer {
     
     private static KafkaProducer<String, String> gameweekProducer;
@@ -24,7 +26,7 @@ public class GameweekProducer {
         Logger logger = LoggerFactory.getLogger(GameweekProducer.class);
     
         // String boostrapServers = "localhost:9092"; 
-        String boostrapServers = "13.40.213.178:9092";
+        String boostrapServers = ConfigFile.HOSTIP+":9092";
 
     
             Properties producerProps = new Properties();

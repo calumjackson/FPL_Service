@@ -14,6 +14,7 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fplService.config.ConfigFile;
 import com.fplService.gameweek.FplGameweekFactory;
 import com.google.gson.Gson;
 
@@ -37,7 +38,7 @@ public final class ManagerGameweekGenerator implements Runnable {
     public void createManagerGameweekConsumer() {
 
         // String boostrapServers = "127.0.0.1:9092";
-        String boostrapServers = "13.40.213.178:9092";
+        String boostrapServers = ConfigFile.HOSTIP+":9092";
 
         Properties consumerProps = new Properties();
         consumerProps.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, boostrapServers);
