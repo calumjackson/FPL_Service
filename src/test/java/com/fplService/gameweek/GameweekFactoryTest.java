@@ -99,7 +99,7 @@ public class GameweekFactoryTest {
 
 
         try {
-            Thread.sleep(40000);
+            Thread.sleep(4000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

@@ -2,6 +2,6 @@ package com.fplService.config;
 
 public class ConfigFile {
     
-    public static String HOSTIP = "13.41.227.37";
+    public static String HOSTIP = "ec2-3-10-167-78.eu-west-2.compute.amazonaws.com";
 
 }
