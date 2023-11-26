@@ -14,11 +14,14 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fplService.config.ConfigFile;
+
 public class GameweekCounter implements Runnable {
  
     Logger logger;
     CountDownLatch latch;
     static String GAMEWEEK_TOPIC = "fpl_gameweeks"; 
+    static String GAMEWEEKCOUNTER_GROUP = "gameweek_counter"; 
     private KafkaConsumer<String, String> gameweekConsumer;
     private static Integer TIMEOUT_LENGTH = 5000;
 
@@ -32,16 +35,14 @@ public class GameweekCounter implements Runnable {
 
     public void startGameweekCounterConsumer() {
 
-        // String boostrapServers = "127.0.0.1:9092";
-        String boostrapServers = "13.40.213.178:9092";
+        String boostrapServers = ConfigFile.HOSTIP+":9092";
 
         Properties consumerProps = new Properties();
         consumerProps.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, boostrapServers);
-        consumerProps.setProperty(ConsumerConfig.GROUP_ID_CONFIG, GAMEWEEK_TOPIC);
+        consumerProps.setProperty(ConsumerConfig.GROUP_ID_CONFIG, GAMEWEEKCOUNTER_GROUP);
         consumerProps.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         consumerProps.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         consumerProps.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
-        consumerProps.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "GameweekCounter");
 
         
         KafkaConsumer<String, String> consumer = new KafkaConsumer<String, String>(consumerProps);
@@ -73,12 +74,11 @@ public class GameweekCounter implements Runnable {
 
     void pollManagerConsumer(Duration timeout) {
 
-        Logger logger = LoggerFactory.getLogger(GameweekCounter.class);
         ConsumerRecords<String, String> records = gameweekConsumer.poll(timeout);
         gameweekCounter += records.count();     
         
     }
-
+    
     public void closeConsumer() {
         gameweekConsumer.close();
     }

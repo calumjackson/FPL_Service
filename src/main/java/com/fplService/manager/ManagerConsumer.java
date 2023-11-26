@@ -24,7 +24,10 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 public final class ManagerConsumer implements Runnable {
 
     public static final String MANAGER_TOPIC = "fpl_managers";
+    public static final String MANAGER_GROUP_ID = "manager_consumers";
+
     private KafkaConsumer<String, String> managerConsumer;
+    
     private CountDownLatch latch;
     Logger logger;
     private static Integer TIMEOUT_LENGTH = 5000;
@@ -42,7 +45,7 @@ public final class ManagerConsumer implements Runnable {
 
         Properties consumerProps = new Properties();
         consumerProps.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, boostrapServers);
-        consumerProps.setProperty(ConsumerConfig.GROUP_ID_CONFIG, MANAGER_TOPIC);
+        consumerProps.setProperty(ConsumerConfig.GROUP_ID_CONFIG, MANAGER_GROUP_ID);
         consumerProps.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         consumerProps.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         consumerProps.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");

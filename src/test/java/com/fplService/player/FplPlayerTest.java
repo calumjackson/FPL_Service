@@ -37,7 +37,7 @@ public class FplPlayerTest {
 
         HttpConnector connector = new HttpConnector();
 
-        logger = LoggerFactory.getLogger(TestHttpConnector.class);
+        logger = LoggerFactory.getLogger(FplPlayerTest.class);
         try {
             String playerListString = connector.getBootstrap();
             System.out.println(playerListString);
@@ -89,7 +89,7 @@ public class FplPlayerTest {
             }
 
             FplPlayerDBUtil dbUtil = new FplPlayerDBUtil();
-            dbUtil.batchStoreManager(playerList);
+            dbUtil.batchStorePlayers(playerList);
 
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -123,6 +123,17 @@ public class FplPlayerTest {
         }
         assertTrue(teamList.getTeams().length>0);
 
+    }
+
+
+    @Test
+    public void showEpochTimestamp() {
+        Boolean output;
+        output = true;
+        Long timestamp = System.currentTimeMillis();
+        System.out.println(System.currentTimeMillis());
+        System.out.println(timestamp.toString());
+        assertTrue(output);
     }
 
 

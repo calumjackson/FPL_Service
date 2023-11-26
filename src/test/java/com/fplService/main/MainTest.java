@@ -17,6 +17,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fplService.bootstrap.FPLGameweekNumberDecoder;
 import com.fplService.databaseConnection.DatabaseUtilHelper;
 import com.fplService.databaseUtils.DatasourcePool;
 import com.fplService.gameweek.FplGameweekFactory;
@@ -40,7 +41,7 @@ public class MainTest {
     public static DatabaseUtilHelper databaseHelper;
     static CountDownLatch latch;
     static Logger logger;
-    Integer numberOfGameweeks = 37;
+    Integer numberOfGameweeks = new FPLGameweekNumberDecoder().getCurrentGameweekId();
     Integer maxLeagueSize = 500;
 
     
@@ -102,7 +103,7 @@ public class MainTest {
 
     @Test
     public void testFlowWithLadsLeague() {
-        Integer leagueId = 57365;
+        Integer leagueId = 117288;
         testMainFlow(leagueId, maxLeagueSize);
     }
 

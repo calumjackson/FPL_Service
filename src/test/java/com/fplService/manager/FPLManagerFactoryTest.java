@@ -14,6 +14,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fplService.bootstrap.FPLGameweekNumberDecoder;
 import com.fplService.databaseConnection.DatabaseUtilHelper;
 import com.fplService.gameweek.FplGameweekFactory;
 import com.fplService.gameweek.GameweekConsumer;
@@ -25,6 +27,7 @@ public class FPLManagerFactoryTest {
 
     private DatabaseUtilHelper databaseHelper = null;
     Logger logger;
+    Integer currentGameweek = new FPLGameweekNumberDecoder().getCurrentGameweekId();
 
     @Before
     public void setUpTestManager() {
@@ -91,8 +94,8 @@ public class FPLManagerFactoryTest {
     @Test
     public void testGetManager() throws InterruptedException {
 
-
         Integer managerId = 931833;
+        
 
         //publishMessage(testManagerJson);
         
@@ -100,10 +103,10 @@ public class FPLManagerFactoryTest {
         
         Integer gameweekCount = new FplGameweekFactory().getManagerGameweekCount(managerId);
 
-        Thread.sleep(3000);
-        Integer expected = 0;
+        Thread.sleep(6000);
+        Integer expected = currentGameweek;
         assertEquals(expected, gameweekCount);
-        assertEquals(gameweekCount, databaseHelper.getRecordCount(DatabaseUtilHelper.fplGameweekTable, Integer.toString(managerId)));
+        assertEquals(expected, databaseHelper.getRecordCount(DatabaseUtilHelper.fplGameweekTable, Integer.toString(managerId)));
   
     }
 

@@ -19,7 +19,7 @@ services:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
       KAFKA_LISTENERS: PLAINTEXT_EXTERNAL://broker:9092,PLAINTEXT_INTERNAL://broker:29092
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT_EXTERNAL://localhost:9092,PLAINTEXT_INTERNAL://broker:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT_EXTERNAL://ec2-3-10-167-78.eu-west-2.compute.amazonaws.com:9092,PLAINTEXT_INTERNAL://broker:29092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT_EXTERNAL:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
@@ -29,7 +29,7 @@ services:
 
 
   init-kafka:
-      image: confluentinc/cp-kafka:7.3.2
+      image: confluentinc/cp-kafka:6.1.1
       depends_on:
         - broker
       entrypoint: [ '/bin/sh', '-c' ]

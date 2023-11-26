@@ -10,6 +10,77 @@ public class FplPlayer {
     private Float selected_by_percent;
     private Integer now_cost;
 
+    private Integer transfers_in;
+    private Integer transfers_in_event;
+    private Integer transfers_out;
+    private Integer transfers_out_event;
+    private Integer penalties_order;
+    private Integer cost_change_event;
+    
+
+    public Integer getCost_change_event() {
+        return cost_change_event;
+    }
+
+
+    public void setCost_change_event(Integer cost_change_event) {
+        this.cost_change_event = cost_change_event;
+    }
+
+
+    public Integer getPenalties_order() {
+        if (penalties_order == null) {
+            penalties_order = 0;
+        }
+        return penalties_order;
+    }
+
+
+    public void setPenalties_order(Integer penalties_order) {
+        
+        this.penalties_order = penalties_order;
+    }
+
+
+    public Integer getTransfers_in() {
+        return transfers_in;
+    }
+
+
+    public void setTransfers_in(Integer transfers_in) {
+        this.transfers_in = transfers_in;
+    }
+
+
+    public Integer getTransfers_in_event() {
+        return transfers_in_event;
+    }
+
+
+    public void setTransfers_in_event(Integer transfers_in_event) {
+        this.transfers_in_event = transfers_in_event;
+    }
+
+
+    public Integer getTransfers_out() {
+        return transfers_out;
+    }
+
+
+    public void setTransfers_out(Integer transfers_out) {
+        this.transfers_out = transfers_out;
+    }
+
+
+    public Integer getTransfers_out_event() {
+        return transfers_out_event;
+    }
+
+
+    public void setTransfers_out_event(Integer transfers_out_event) {
+        this.transfers_out_event = transfers_out_event;
+    }
+
 
     public String position_converter() {
         Integer position = this.getElement_type();

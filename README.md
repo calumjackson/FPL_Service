@@ -38,3 +38,24 @@ The environement setup for kafka took some points:
 >      KAFKA_HEAP_OPTS: "-Xmx512m -Xms512M"
 >      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_INTERNAL
 
+
+Copy data from local drive to AWS.
+> # scp -i <certificate> -r <file_to_upload> <target-user>@<IP>:\<file_locations>
+> scp -i AWS_Coding/AWS_Tutorial/cj-tutorial.pem -r FPL_Service ec2-user@3.10.167.78:\data
+
+
+
+'''
+select * from fpl_teams;
+select * from fpl_players;
+
+
+select players.*, teams.team_name 
+from fpl_players players
+left outer join fpl_teams teams
+on players.team_id = teams.team_id
+WHERE selected_by_percent > 10
+order by selected_by_percent desc
+;
+'''
+

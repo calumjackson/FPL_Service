@@ -15,7 +15,7 @@ public class FplGameweekFactory {
             
             ProducerRecord<String, String> gameweekRecord 
                 = new ProducerRecord<String,String>(GameweekProducer.GAMEWEEK_TOPIC, gameweek.toString());
-
+            
             GameweekProducer.sendMessage(gameweekRecord);
         }            
         return fplGameweeks.size();
