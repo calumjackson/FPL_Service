@@ -6,6 +6,7 @@ import com.fplService.league.LeagueResponseDecoder;
 import com.fplService.manager.FplManager;
 import com.fplService.manager.ManagerDetailsResponseDecoder;
 
+import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -77,11 +78,13 @@ public class HttpConnector {
 
         Response response = null;
         try {
-            response = client.newCall(request).execute();            
+            Call clientCaller = client.newCall(request);
+            response = clientCaller.execute();            
             String managerJsonString = response.body().string();
             return new ManagerDetailsResponseDecoder().decodeResponse(managerJsonString);
             
         } catch (IOException e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         } finally {
             response.close();
@@ -180,6 +183,7 @@ public class HttpConnector {
             return gameweeks;
             
         } catch (IOException e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         } finally {
             response.close();

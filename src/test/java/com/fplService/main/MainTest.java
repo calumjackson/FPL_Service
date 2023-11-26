@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import com.fplService.bootstrap.FPLGameweekNumberDecoder;
 import com.fplService.databaseConnection.DatabaseUtilHelper;
 import com.fplService.databaseUtils.DatasourcePool;
-import com.fplService.gameweek.FplGameweekFactory;
 import com.fplService.gameweek.GameweekConsumer;
 import com.fplService.gameweek.GameweekConsumerCloser;
 import com.fplService.gameweek.GameweekCounter;
@@ -44,7 +43,6 @@ public class MainTest {
     Integer numberOfGameweeks = new FPLGameweekNumberDecoder().getCurrentGameweekId();
     Integer maxLeagueSize = 500;
 
-    
     @BeforeClass
     public static void initiateDatabaseHelper() throws SQLException {
         logger = LoggerFactory.getLogger(MainTest.class);
@@ -83,8 +81,6 @@ public class MainTest {
         GameweekCounter gameweekCounter = new GameweekCounter(latch);
         new Thread(gameweekCounter).start();
         Runtime.getRuntime().addShutdownHook(new Thread(new GameweekCounterCloser(gameweekCounter)));
-
-
     }
 
     @After
@@ -97,8 +93,7 @@ public class MainTest {
         databaseHelper.closeConnection();
         closeDatabase();
         closeProducers();      
-        GameweekCounter.resetGameweekCounter();  
-
+        GameweekCounter.resetGameweekCounter();
     }
 
     @Test
@@ -106,7 +101,6 @@ public class MainTest {
         Integer leagueId = 117288;
         testMainFlow(leagueId, maxLeagueSize);
     }
-
 
     @Test
     public void testFlowWithtwoPageLeague() {
@@ -148,12 +142,7 @@ public class MainTest {
                 new FplManagerFactory().createFplManager(managerId);
                 
             }
-
-            // // Get the gameweek totals for each manager.
-            for (Integer managerId : managerIds) {
-                gameweekCount += populateGameweekTotals(managerId);
-            }
-             
+            
             // Wait a little bit for the messages to be processed on the separate threads
             checkDatabaseUpdates(DatabaseUtilHelper.fplManagersTable);
             checkDatabaseUpdates(DatabaseUtilHelper.fplGameweekTable);
@@ -176,6 +165,7 @@ public class MainTest {
         Integer databaseCount = 0;
         Boolean isUpdating = true;
         Integer attemptcount = 0;
+        
         while (isUpdating) {
             Integer newCount = databaseHelper.getRecordCount(tableName);
             logger.debug("DatabaseCount: " + databaseCount + ", newCount" + newCount);
@@ -238,8 +228,7 @@ public class MainTest {
             ProducerRecord<String, String> testManagerRecord = new ProducerRecord<String, String>(DatabaseUtilHelper.fplGameweekTable, testMessage);
             GameweekProducer.sendMessage(testManagerRecord);
         }
-
-}
+    }
 
     private static void closeProducers() {
         GameweekProducer.closeProducer();
@@ -250,14 +239,9 @@ public class MainTest {
         DatasourcePool.closeConnectionPool();
     }
 
-    private static Integer populateGameweekTotals(Integer managerId) {
-        return new FplGameweekFactory().getManagerGameweekCount(managerId);
-    }
-
     public void clearDownData() throws SQLException {
         new FplManagerDBUtil().deleteAllManagers();
         new FplManagerDBUtil().deleteAllGameweeks();
-        
     }
 
 }
