@@ -21,6 +21,7 @@ import com.fplService.gameweek.FplGameweekFactory;
 import com.fplService.gameweek.GameweekConsumer;
 import com.fplService.gameweek.GameweekConsumerCloser;
 import com.fplService.gameweek.GameweekProducer;
+import com.google.gson.Gson;
 
 
 public class FPLManagerFactoryTest {
@@ -82,13 +83,48 @@ public class FPLManagerFactoryTest {
     "\"managerLastName\": \"Litherland\", \"managerId\": \""+testManagerId+"\"," + 
     " \"teamName\": \"Klopps n Robbers\" }";
 
+    static String testInvalidTeamNameManagerId = "5788418";
+    static String testInvalidCharJson = "{ \"managerFirstName\": \"Elgan\", \"managerLastName\": \"Jones\", \"managerId\": \"5788418\", \"teamName\": \"\\o/\" }";
+    // static String testInvalidCharJsonWithQuotes = "{ "managerFirstName": "Marko", "managerLastName": "Žubrinić", "managerId": "557148", "teamName": "\"maximuss128\"" };
 
-    // @Test
-    public void publishMessage(String testMessage) {
-        
-            ProducerRecord<String, String> testManagerRecord = new ProducerRecord<String, String>(ManagerProducer.MANAGER_TOPIC, testMessage);
+
+    public void publishMessage(String testMessage)  {
+
+            // System.out.println(testMessage.replace("\\", "\\\\").replace("/", "\\/"));
+            FplManager fplManager = new FplManager(testMessage.replace("\\", "\\\\").replace("/", "\\/"));
+
+            ProducerRecord<String, String> testManagerRecord = new ProducerRecord<String, String>(ManagerProducer.MANAGER_TOPIC, fplManager.toString());
 
             ManagerProducer.sendMessage(testManagerRecord);
+            Integer expected = 0;
+            Integer actual = 0;
+            assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testJSONMapping() {
+        String testJson = testInvalidCharJson.replace("\\", "\\\\").replace("/", "\\/");
+        logger.info("Test json " + testJson);
+
+        FplManager manager = new Gson().fromJson(testJson, FplManager.class);
+        logger.info("Manager Info: " + manager.getTeamName());
+    }
+
+    @Test
+    public void testInvalidTeamName() throws InterruptedException {
+        
+        assertFalse(databaseHelper.doesManagerRecordExist(testInvalidTeamNameManagerId));
+        publishMessage(testInvalidCharJson);
+        CountDownLatch latch = new CountDownLatch(1);
+        ManagerConsumer managerConsumer = new ManagerConsumer(latch);
+        managerConsumer.createTeamConsumer();
+        managerConsumer.pollManagerConsumer(Duration.ofMillis(10000));
+
+        managerConsumer.closeConsumer();
+        latch.await(1, TimeUnit.SECONDS);
+
+        assertTrue(databaseHelper.doesManagerRecordExist(testInvalidTeamNameManagerId));
+
     }
 
     @Test

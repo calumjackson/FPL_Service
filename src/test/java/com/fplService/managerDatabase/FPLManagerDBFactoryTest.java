@@ -42,7 +42,6 @@ public class FPLManagerDBFactoryTest {
         }
         try {
             gameweekCountValue = managerFactory.getGameweekCount();
-            System.out.println();
         } catch (SQLException e) {
             e.printStackTrace();
         }

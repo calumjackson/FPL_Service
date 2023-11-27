@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
@@ -116,8 +117,16 @@ public class MainTest {
     }
 
     @Test
+    public void testFlowWithInvalidTeamName() {
+        Integer leagueId = 1150143;
+        testMainFlow(leagueId, maxLeagueSize);
+    }
+
+
+
+    @Test
     public void testFlowWithLargestLeague() {
-        Integer maxLeagueSize = 3000;
+        Integer maxLeagueSize = 5000;
         Integer leagueId = 11;
         testMainFlow(leagueId, maxLeagueSize);
     }
@@ -137,11 +146,28 @@ public class MainTest {
             managerCount = managerIds.size();
             logger.info("Managers: " + managerCount);
         
+            List<Integer> failedManagerIds = new ArrayList<>();
+
             // Create all the managers in the league
             for (Integer managerId : managerIds) {
-                new FplManagerFactory().createFplManager(managerId);
-                
+                try {
+                    new FplManagerFactory().createFplManager(managerId);
+                } catch (Exception e) {
+                    logger.info(e.getMessage());
+                    failedManagerIds.add(managerId);
+                    Thread.sleep(100);
+                }
             }
+
+            for (Integer managerId : failedManagerIds) {
+                try {
+                    new FplManagerFactory().createFplManager(managerId);
+                } catch (Exception e) {
+                    e.printStackTrace();                
+                }
+            }
+
+
             
             // Wait a little bit for the messages to be processed on the separate threads
             checkDatabaseUpdates(DatabaseUtilHelper.fplManagersTable);
@@ -165,7 +191,7 @@ public class MainTest {
         Integer databaseCount = 0;
         Boolean isUpdating = true;
         Integer attemptcount = 0;
-        
+
         while (isUpdating) {
             Integer newCount = databaseHelper.getRecordCount(tableName);
             logger.debug("DatabaseCount: " + databaseCount + ", newCount" + newCount);

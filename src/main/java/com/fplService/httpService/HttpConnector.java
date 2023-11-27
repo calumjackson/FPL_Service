@@ -86,8 +86,13 @@ public class HttpConnector {
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
         } finally {
-            response.close();
+            if (response != null) {
+                response.close();
+            }
         }
     }
 

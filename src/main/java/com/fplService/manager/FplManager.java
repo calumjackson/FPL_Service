@@ -8,8 +8,6 @@ public class FplManager {
     private String managerLastName;
     private Integer managerId;
     private String teamName;
-
- 
     
 
     public FplManager(Integer managerId, String managerFirstName, String managerLastName, String teamName) {
@@ -19,6 +17,16 @@ public class FplManager {
         this.teamName = teamName;
 
     }
+
+    public FplManager(String managerJson) {
+        FplManager manager = new Gson().fromJson((managerJson), FplManager.class);
+        this.managerId = manager.managerId;
+        this.managerFirstName = manager.managerFirstName;
+        this.managerLastName = manager.managerLastName;
+        this.teamName = manager.teamName;
+    }
+
+    
 
     public String getManagerFirstName() {
         return managerFirstName;
@@ -33,11 +41,11 @@ public class FplManager {
     }
 
     public void setManagerFirstName(String managerName) {
-        this.managerFirstName = managerName;
+        this.managerFirstName = managerName.replace("\"", "\\\"");
     }
 
     public void setManagerLastName(String managerName) {
-        this.managerLastName = managerName;
+        this.managerLastName = managerName.replace("\"", "\\\"");
     }
 
     public void setManagerId(Integer managerId) {
@@ -45,7 +53,7 @@ public class FplManager {
     }
 
     public String getTeamName() {
-        return teamName;
+        return teamName.replace("\\", "\\\\").replace("\\\"", "\"");
     }
 
     public void setTeamName(String teamName) {
@@ -59,7 +67,6 @@ public class FplManager {
                 + "\"managerId\": \"%d\", "
                 + "\"teamName\": \"%s\" }";
 
-
         return String.format(formatString, getManagerFirstName(), getManagerLastName(),
                         getManagerId(), getTeamName());
     }  
@@ -70,4 +77,5 @@ public class FplManager {
         return manager;
         
     }
+
 }

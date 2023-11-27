@@ -97,10 +97,11 @@ public final class ManagerConsumer implements Runnable {
                 record.key(), record.value());
 
                 try {
-                    FplManager manager = new Gson().fromJson((record.value()), FplManager.class);
+                    FplManager manager = new Gson().fromJson(record.value(), FplManager.class);
                     fplManagerList.add(manager);
                 } catch (Exception e) {
                     logger.info("GSON error:" + e.getMessage());
+                    logger.info("GSON error:" + record.value());
                     throw e;
                 }
             }
@@ -110,6 +111,7 @@ public final class ManagerConsumer implements Runnable {
         }
         
     }
+
 
     public void closeConsumer() {
         managerConsumer.close();

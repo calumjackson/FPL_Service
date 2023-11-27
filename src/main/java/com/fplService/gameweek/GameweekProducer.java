@@ -15,7 +15,7 @@ public class GameweekProducer {
     
     private static KafkaProducer<String, String> gameweekProducer;
     static String GAMEWEEK_TOPIC = "fpl_gameweeks"; 
-
+    static Logger logger;
 
     public GameweekProducer() {
         createGameweekProducer();
@@ -23,7 +23,7 @@ public class GameweekProducer {
 
     public static void createGameweekProducer() {
 
-        Logger logger = LoggerFactory.getLogger(GameweekProducer.class);
+        logger = LoggerFactory.getLogger(GameweekProducer.class);
     
         // String boostrapServers = "localhost:9092"; 
         String boostrapServers = ConfigFile.HOSTIP+":9092";
@@ -43,13 +43,20 @@ public class GameweekProducer {
 
     public static void sendMessage(ProducerRecord<String, String> producerRecord) {
 
-        gameweekProducer.send(producerRecord);
+        try {
+            gameweekProducer.send(producerRecord);
+        } catch (Exception e) {
+            logger.info("Issue sending record: " + producerRecord.value());
+            e.printStackTrace();
+        }
 
     }  
-
+    
     public static void closeProducer() {
         gameweekProducer.flush();
         gameweekProducer.close();
+        logger.info("Gameweek Producer Closed");
+
     }
 
 }

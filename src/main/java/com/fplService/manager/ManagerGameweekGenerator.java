@@ -25,6 +25,8 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 public final class ManagerGameweekGenerator implements Runnable {
 
     public static final String MANAGER_TOPIC = "fpl_managers";
+    public static final String GAMEWEEK_GEN_GROUP = "gameweek_generator_group";
+
     private KafkaConsumer<String, String> managerConsumer;
     private CountDownLatch latch;
     Logger logger;
@@ -42,11 +44,10 @@ public final class ManagerGameweekGenerator implements Runnable {
 
         Properties consumerProps = new Properties();
         consumerProps.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, boostrapServers);
-        consumerProps.setProperty(ConsumerConfig.GROUP_ID_CONFIG, MANAGER_TOPIC);
         consumerProps.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         consumerProps.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         consumerProps.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
-        consumerProps.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "GameweekGenerator");
+        consumerProps.setProperty(ConsumerConfig.GROUP_ID_CONFIG, GAMEWEEK_GEN_GROUP);
         
         KafkaConsumer<String, String> consumer = new KafkaConsumer<String, String>(consumerProps);
 
@@ -61,12 +62,13 @@ public final class ManagerGameweekGenerator implements Runnable {
         try {
 
             while (true) {
-
-                pollManagerConsumer(timeout);
+                pollManagerConsumer(timeout);                    
                 
             }
         } catch (WakeupException e) {
             System.out.println("Manager Gameweek Consumer Woken up");
+        } catch (Exception e) {
+            e.printStackTrace();
         } finally {
             managerConsumer.commitAsync();
             managerConsumer.close();
@@ -95,11 +97,12 @@ public final class ManagerGameweekGenerator implements Runnable {
                 record.key(), record.value());
 
                 try {
-                    FplManager manager = new Gson().fromJson((record.value()), FplManager.class);
+                    FplManager manager = new Gson().fromJson(record.value(), FplManager.class);
                     fplManagerList.add(manager);
                 } catch (Exception e) {
                     logger.info("GSON error:" + e.getMessage());
-                    throw e;
+                    logger.info("GSON error:" + record.value());
+                    // throw e;
                 }
             }
             for (FplManager manager : fplManagerList) {
@@ -108,7 +111,6 @@ public final class ManagerGameweekGenerator implements Runnable {
             }
             
         }
-        
     }
 
     public void closeConsumer() {
